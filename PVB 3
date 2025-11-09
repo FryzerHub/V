@@ -12,18 +12,7 @@ local useNonce = true;
 
 local DISCORD_INVITE = "https://discord.com/invite/UKYHGddQD3"
 
---! Your Main Script Function
-local function executeMainScript()
-    local StarterGui = game:GetService("StarterGui")
-    StarterGui:SetCore("SendNotification", {
-        Title = "FRYZER HUB";
-        Text = "Successfully loaded!";
-        Duration = 5;
-    })
-    
-    -- PUT YOUR MAIN SCRIPT CODE HERE
-
-    -- Fryzer Hub for Plants vs Brainrot v2
+-- Fryzer Hub for Plants vs Brainrot v2
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -1869,6 +1858,16 @@ game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
     stopKillAura()
 end)
 
+--! Your Main Script Function
+local function executeMainScript()
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCore("SendNotification", {
+        Title = "FRYZER HUB";
+        Text = "Successfully loaded!";
+        Duration = 5;
+    })
+    
+    -- PUT YOUR MAIN SCRIPT CODE HER
 
 
 end
