@@ -1,1896 +1,20 @@
--- PVB v3 Key system 
+-- PVB v3 Key system
 --! json library & cryptography library (from platoboost)
 local a=2^32;local b=a-1;local function c(d,e)local f,g=0,1;while d~=0 or e~=0 do local h,i=d%2,e%2;local j=(h+i)%2;f=f+j*g;d=math.floor(d/2)e=math.floor(e/2)g=g*2 end;return f%a end;local function k(d,e,l,...)local m;if e then d=d%a;e=e%a;m=c(d,e)if l then m=k(m,l,...)end;return m elseif d then return d%a else return 0 end end;local function n(d,e,l,...)local m;if e then d=d%a;e=e%a;m=(d+e-c(d,e))/2;if l then m=n(m,l,...)end;return m elseif d then return d%a else return b end end;local function o(p)return b-p end;local function q(d,r)if r<0 then return lshift(d,-r)end;return math.floor(d%2^32/2^r)end;local function s(p,r)if r>31 or r<-31 then return 0 end;return q(p%a,r)end;local function lshift(d,r)if r<0 then return s(d,-r)end;return d*2^r%2^32 end;local function t(p,r)p=p%a;r=r%32;local u=n(p,2^r-1)return s(p,r)+lshift(u,32-r)end;local v={0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2}local function w(x)return string.gsub(x,".",function(l)return string.format("%02x",string.byte(l))end)end;local function y(z,A)local x=""for B=1,A do local C=z%256;x=string.char(C)..x;z=(z-C)/256 end;return x end;local function D(x,B)local A=0;for B=B,B+3 do A=A*256+string.byte(x,B)end;return A end;local function E(F,G)local H=64-(G+9)%64;G=y(8*G,8)F=F.."\128"..string.rep("\0",H)..G;assert(#F%64==0)return F end;local function I(J)J[1]=0x6a09e667;J[2]=0xbb67ae85;J[3]=0x3c6ef372;J[4]=0xa54ff53a;J[5]=0x510e527f;J[6]=0x9b05688c;J[7]=0x1f83d9ab;J[8]=0x5be0cd19;return J end;local function K(F,B,J)local L={}for M=1,16 do L[M]=D(F,B+(M-1)*4)end;for M=17,64 do local N=L[M-15]local O=k(t(N,7),t(N,18),s(N,3))N=L[M-2]L[M]=(L[M-16]+O+L[M-7]+k(t(N,17),t(N,19),s(N,10)))%a end;local d,e,l,P,Q,R,S,T=J[1],J[2],J[3],J[4],J[5],J[6],J[7],J[8]for B=1,64 do local O=k(t(d,2),t(d,13),t(d,22))local U=k(n(d,e),n(d,l),n(e,l))local V=(O+U)%a;local W=k(t(Q,6),t(Q,11),t(Q,25))local X=k(n(Q,R),n(o(Q),S))local Y=(T+W+X+v[B]+L[B])%a;T=S;S=R;R=Q;Q=(P+Y)%a;P=l;l=e;e=d;d=(Y+V)%a end;J[1]=(J[1]+d)%a;J[2]=(J[2]+e)%a;J[3]=(J[3]+l)%a;J[4]=(J[4]+P)%a;J[5]=(J[5]+Q)%a;J[6]=(J[6]+R)%a;J[7]=(J[7]+S)%a;J[8]=(J[8]+T)%a end;local function Z(F)F=E(F,#F)local J=I({})for B=1,#F,64 do K(F,B,J)end;return w(y(J[1],4)..y(J[2],4)..y(J[3],4)..y(J[4],4)..y(J[5],4)..y(J[6],4)..y(J[7],4)..y(J[8],4))end;local e;local l={["\\"]="\\",["\""]="\"",["\b"]="b",["\f"]="f",["\n"]="n",["\r"]="r",["\t"]="t"}local P={["/"]="/"}for Q,R in pairs(l)do P[R]=Q end;local S=function(T)return"\\"..(l[T]or string.format("u%04x",T:byte()))end;local B=function(M)return"null"end;local v=function(M,z)local _={}z=z or{}if z[M]then error("circular reference")end;z[M]=true;if rawget(M,1)~=nil or next(M)==nil then local A=0;for Q in pairs(M)do if type(Q)~="number"then error("invalid table: mixed or invalid key types")end;A=A+1 end;if A~=#M then error("invalid table: sparse array")end;for a0,R in ipairs(M)do table.insert(_,e(R,z))end;z[M]=nil;return"["..table.concat(_,",").."]"else for Q,R in pairs(M)do if type(Q)~="string"then error("invalid table: mixed or invalid key types")end;table.insert(_,e(Q,z)..":"..e(R,z))end;z[M]=nil;return"{"..table.concat(_,",").."}"end end;local g=function(M)return'"'..M:gsub('[%z\1-\31\\"]',S)..'"'end;local a1=function(M)if M~=M or M<=-math.huge or M>=math.huge then error("unexpected number value '"..tostring(M).."'")end;return string.format("%.14g",M)end;local j={["nil"]=B,["table"]=v,["string"]=g,["number"]=a1,["boolean"]=tostring}e=function(M,z)local x=type(M)local a2=j[x]if a2 then return a2(M,z)end;error("unexpected type '"..x.."'")end;local a3=function(M)return e(M)end;local a4;local N=function(...)local _={}for a0=1,select("#",...)do _[select(a0,...)]=true end;return _ end;local L=N(" ","\t","\r","\n")local p=N(" ","\t","\r","\n","]","}",",")local a5=N("\\","/",'"',"b","f","n","r","t","u")local m=N("true","false","null")local a6={["true"]=true,["false"]=false,["null"]=nil}local a7=function(a8,a9,aa,ab)for a0=a9,#a8 do if aa[a8:sub(a0,a0)]~=ab then return a0 end end;return#a8+1 end;local ac=function(a8,a9,J)local ad=1;local ae=1;for a0=1,a9-1 do ae=ae+1;if a8:sub(a0,a0)=="\n"then ad=ad+1;ae=1 end end;error(string.format("%s at line %d col %d",J,ad,ae))end;local af=function(A)local a2=math.floor;if A<=0x7f then return string.char(A)elseif A<=0x7ff then return string.char(a2(A/64)+192,A%64+128)elseif A<=0xffff then return string.char(a2(A/4096)+224,a2(A%4096/64)+128,A%64+128)elseif A<=0x10ffff then return string.char(a2(A/262144)+240,a2(A%262144/4096)+128,a2(A%4096/64)+128,A%64+128)end;error(string.format("invalid unicode codepoint '%x'",A))end;local ag=function(ah)local ai=tonumber(ah:sub(1,4),16)local aj=tonumber(ah:sub(7,10),16)if aj then return af((ai-0xd800)*0x400+aj-0xdc00+0x10000)else return af(ai)end end;local ak=function(a8,a0)local _=""local al=a0+1;local Q=al;while al<=#a8 do local am=a8:byte(al)if am<32 then ac(a8,al,"control character in string")elseif am==92 then _=_..a8:sub(Q,al-1)al=al+1;local T=a8:sub(al,al)if T=="u"then local an=a8:match("^[dD][89aAbB]%x%x\\u%x%x%x%x",al+1)or a8:match("^%x%x%x%x",al+1)or ac(a8,al-1,"invalid unicode escape in string")_=_..ag(an)al=al+#an else if not a5[T]then ac(a8,al-1,"invalid escape char '"..T.."' in string")end;_=_..P[T]end;Q=al+1 elseif am==34 then _=_..a8:sub(Q,al-1)return _,al+1 end;al=al+1 end;ac(a8,a0,"expected closing quote for string")end;local ao=function(a8,a0)local am=a7(a8,a0,p)local ah=a8:sub(a0,am-1)local A=tonumber(ah)if not A then ac(a8,a0,"invalid number '"..ah.."'")end;return A,am end;local ap=function(a8,a0)local am=a7(a8,a0,p)local aq=a8:sub(a0,am-1)if not m[aq]then ac(a8,a0,"invalid literal '"..aq.."'")end;return a6[aq],am end;local ar=function(a8,a0)local _={}local A=1;a0=a0+1;while 1 do local am;a0=a7(a8,a0,L,true)if a8:sub(a0,a0)=="]"then a0=a0+1;break end;am,a0=a4(a8,a0)_[A]=am;A=A+1;a0=a7(a8,a0,L,true)local as=a8:sub(a0,a0)a0=a0+1;if as=="]"then break end;if as~=","then ac(a8,a0,"expected ']' or ','")end end;return _,a0 end;local at=function(a8,a0)local _={}a0=a0+1;while 1 do local au,M;a0=a7(a8,a0,L,true)if a8:sub(a0,a0)=="}"then a0=a0+1;break end;if a8:sub(a0,a0)~='"'then ac(a8,a0,"expected string for key")end;au,a0=a4(a8,a0)a0=a7(a8,a0,L,true)if a8:sub(a0,a0)~=":"then ac(a8,a0,"expected ':' after key")end;a0=a7(a8,a0+1,L,true)M,a0=a4(a8,a0)_[au]=M;a0=a7(a8,a0,L,true)local as=a8:sub(a0,a0)a0=a0+1;if as=="}"then break end;if as~=","then ac(a8,a0,"expected '}' or ','")end end;return _,a0 end;local av={['"']=ak,["0"]=ao,["1"]=ao,["2"]=ao,["3"]=ao,["4"]=ao,["5"]=ao,["6"]=ao,["7"]=ao,["8"]=ao,["9"]=ao,["-"]=ao,["t"]=ap,["f"]=ap,["n"]=ap,["["]=ar,["{"]=at}a4=function(a8,a9)local as=a8:sub(a9,a9)local a2=av[as]if a2 then return a2(a8,a9)end;ac(a8,a9,"unexpected character '"..as.."'")end;local aw=function(a8)if type(a8)~="string"then error("expected argument of type string, got "..type(a8))end;local _,a9=a4(a8,a7(a8,1,L,true))a9=a7(a8,a9,L,true)if a9<=#a8 then ac(a8,a9,"trailing garbage")end;return _ end;
 local lEncode, lDecode, lDigest = a3, aw, Z;
 -------------------------------------------------------------------------------
-
 -------------------------------------------------------------------------------
 --! PlatoBoost Configuration
-local service = 7038;  -- YOUR SERVICE ID
-local secret = "82af1685-8984-408e-9dc1-194acc7ba683";  -- YOUR SECRET (OBFUSCATE THIS!)
+local service = 7038; -- YOUR SERVICE ID
+local secret = "82af1685-8984-408e-9dc1-194acc7ba683"; -- YOUR SECRET (OBFUSCATE THIS!)
 local useNonce = true;
-
 local DISCORD_INVITE = "https://discord.com/invite/UKYHGddQD3"
-
--- Fryzer Hub for Plants vs Brainrot v2
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-WindUI:SetNotificationLower(true)
-
-WindUI:AddTheme({
-    Name = "Blue Theme",
-    Accent = Color3.fromRGB(37, 99, 235),
-    Dialog = Color3.fromRGB(15, 23, 42),
-    Outline = Color3.fromRGB(59, 130, 246),
-    Text = Color3.fromRGB(248, 250, 252),
-    Placeholder = Color3.fromRGB(100, 116, 139),
-    Background = Color3.fromRGB(15, 23, 42),
-    Button = Color3.fromRGB(30, 58, 138),
-    Icon = Color3.fromRGB(147, 197, 253)
-})
-
-local Window = WindUI:CreateWindow({
-    Title = "Fryzer Hub",
-    Icon = "",
-    Author = "Plants vs Brainrot",
-    Folder = "AutoBuyHub",
-    Size = UDim2.fromOffset(580, 460),
-    MinSize = Vector2.new(560, 350),
-    MaxSize = Vector2.new(850, 560),
-    Transparent = true,
-    Theme = "Blue Theme",
-    Resizable = true,
-    SideBarWidth = 200,
-    BackgroundImageTransparency = 0.42,
-    HideSearchBar = false,
-    ScrollBarEnabled = true,
-})
-
-Window:Tag({
-    Title = "v4.5",
-    Color = Color3.fromHex("#30ff6a"),
-    Radius = 8,
-})
-
-Window:Tag({
-    Title = "PVB",
-    Color = Color3.fromHex("#ff0000"),
-    Radius = 10,
-})
-
-local InfoTab = Window:Tab({
-    Title = "Info",
-    Icon = "info",
-    Locked = false,
-})
-
-InfoTab:Select()
-
-local Sectiontest = InfoTab:Section({
-    Title = "Player Information Dashboard",
-    Icon = "user-check",
-})
-
-InfoTab:Paragraph({
-    Title = "Player Information Dashboard",
-    Desc = "Complete player details, game information, and community access",
-    Color = "Blue",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {}
-})
-
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local Player = Players.LocalPlayer
-local PlayerName = Player.DisplayName ~= "" and Player.DisplayName or Player.Name
-local AccountAge = Player.AccountAge
-local GameName = "Unknown Game"
-pcall(function()
-    GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-end)
-
-InfoTab:Paragraph({
-    Title = "👤 " .. PlayerName,
-    Desc = string.format(
-        "🏷️ Username: @%s\n🎂 Account Age: %d days\n🆔 User ID: %d\n🎮 Current Game: %s\n👥 Server: %d/%d players\n📍 Region: %s",
-        Player.Name, AccountAge, Player.UserId, GameName,
-        #Players:GetPlayers(), Players.MaxPlayers,
-        game:GetService("LocalizationService").RobloxLocaleId
-    ),
-    Color = "Blue",
-    Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. Player.UserId .. "&width=150&height=150&format=png",
-    ImageSize = 52,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {}
-})
-
-InfoTab:Divider()
-
-local Section2 = InfoTab:Section({
-    Title = "Join Our Discord Community",
-    Icon = "users",
-})
-
-InfoTab:Paragraph({
-    Title = "Join Our Discord Community",
-    Desc = "Connect with other users, get support, and stay updated!",
-    Color = "Blue",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {}
-})
-
-InfoTab:Button({
-    Title = "Copy Discord Link",
-    Desc = "Copy invite link to clipboard",
-    Locked = false,
-    Callback = function()
-        setclipboard("https://discord.gg/SYHphHCq9a")
-        WindUI:Notify({
-            Title = "Link Copied!",
-            Content = "Discord link copied to clipboard",
-            Duration = 3,
-            Icon = "copy",
-        })
-    end
-})
-
-InfoTab:Space()
-
--- Configuration Variables for Seeds
-local AUTO_BUY_ENABLED = false
-local SELECTED_ITEMS = {}
-local CLICK_DELAY = 0.1
-local buyRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyItem")
-
--- Configuration Variables for Gear
-local AUTO_BUY_GEAR_ENABLED = false
-local SELECTED_GEAR = {}
-local GEAR_CLICK_DELAY = 0.1
-local buyGearRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyGear")
-
--- Available items (you can add more here)
-local AVAILABLE_ITEMS = {
-    "Cactus Seed",
-    "Watermelon Seed",
-    "Tomatrio Seed",
-    "Sunflower Seed",
-    "Strawberry Seed",
-    "Shroombino Seed",
-    "Pumpkin Seed",
-    "Mr Carrot Seed",
-    "Mango Seed",
-    "King Limone Seed",
-    "Grape Seed",
-    "Eggplant Seed",
-    "Dragon Fruit Seed",
-    "Cocotank Seed",
-    "Carnivorous Plant Seed",
-}
-
--- Available gear items
-local AVAILABLE_GEAR = {
-    "Water Bucket",
-    "Frost Grenade",
-    "Frost Blower",
-    "Carrot Launcher",
-    "Banana Gun",
-}
-
--- Function to buy seeds
-local function clickButton(itemName)
-    pcall(function()
-        local args = {itemName, true}
-        buyRemote:FireServer(unpack(args))
-    end)
-end
-
--- Function to buy gear
-local function clickGearButton(gearName)
-    pcall(function()
-        local args = {gearName, true}
-        buyGearRemote:FireServer(unpack(args))
-    end)
-end
-
--- Main auto-buy loop for seeds
-local function startAutoBuy()
-    spawn(function()
-        while AUTO_BUY_ENABLED do
-            if #SELECTED_ITEMS > 0 then
-                for _, itemName in ipairs(SELECTED_ITEMS) do
-                    clickButton(itemName)
-                    wait(CLICK_DELAY / #SELECTED_ITEMS)
-                end
-            end
-            wait(0.01)
-        end
-    end)
-end
-
--- Main auto-buy loop for gear
-local function startGearAutoBuy()
-    spawn(function()
-        while AUTO_BUY_GEAR_ENABLED do
-            if #SELECTED_GEAR > 0 then
-                for _, gearName in ipairs(SELECTED_GEAR) do
-                    clickGearButton(gearName)
-                    wait(GEAR_CLICK_DELAY / #SELECTED_GEAR)
-                end
-            end
-            wait(0.01)
-        end
-    end)
-end
-
--- Create Main Tab
-local MainTab = Window:Tab({
-    Title = "Auto",
-    Icon = "repeat",
-    Locked = false,
-})
-
--- Section: Auto Buy Controls
-local ControlSection = MainTab:Section({
-    Title = "Auto Buy Controls",
-    Icon = "shopping-cart",
-})
-
-local ControlSectionseeds = MainTab:Section({
-    Title = "Seeds Auto Buyer",
-    Icon = "",
-})
-
--- Multi-Select Dropdown for Items
-local ItemDropdown = MainTab:Dropdown({
-    Title = "Select Items to Buy",
-    Values = AVAILABLE_ITEMS,
-    Value = {},
-    Multi = true,
-    AllowNone = true,
-    Callback = function(selectedItems)
-        SELECTED_ITEMS = selectedItems
-        WindUI:Notify({
-            Title = "Items Updated",
-            Content = #selectedItems .. " item(s) selected for auto-buy",
-            Duration = 2,
-            Icon = "check",
-        })
-    end
-})
-
--- Toggle for Auto Buy
-local AutoBuyToggle = MainTab:Toggle({
-    Title = "Enable Auto Buy",
-    Desc = "Automatically purchase selected items",
-    Default = false,
-    Callback = function(value)
-        AUTO_BUY_ENABLED = value
-        
-        if value then
-            if #SELECTED_ITEMS == 0 then
-                WindUI:Notify({
-                    Title = "No Items Selected",
-                    Content = "Please select items before enabling auto-buy",
-                    Duration = 3,
-                    Icon = "alert-triangle",
-                })
-                AutoBuyToggle:SetValue(false)
-                return
-            end
-            
-            WindUI:Notify({
-                Title = "Auto Buy Started",
-                Content = "Buying " .. #SELECTED_ITEMS .. " item(s) continuously",
-                Duration = 3,
-                Icon = "play",
-            })
-            startAutoBuy()
-        else
-            WindUI:Notify({
-                Title = "Auto Buy Stopped",
-                Content = "Auto-buy has been disabled",
-                Duration = 2,
-                Icon = "stop-circle",
-            })
-        end
-    end
-})
-
-MainTab:Space()
-
-local ControlSectionGear = MainTab:Section({
-    Title = "Gear Auto Buyer",
-    Icon = "",
-})
-
--- Multi-Select Dropdown for Gear
-local GearDropdown = MainTab:Dropdown({
-    Title = "Select Gear to Buy",
-    Values = AVAILABLE_GEAR,
-    Value = {},
-    Multi = true,
-    AllowNone = true,
-    Callback = function(selectedGear)
-        SELECTED_GEAR = selectedGear
-        WindUI:Notify({
-            Title = "Gear Updated",
-            Content = #selectedGear .. " gear item(s) selected for auto-buy",
-            Duration = 2,
-            Icon = "check",
-        })
-    end
-})
-
--- Toggle for Gear Auto Buy
-local GearAutoBuyToggle = MainTab:Toggle({
-    Title = "Enable Gear Auto Buy",
-    Desc = "Automatically purchase selected gear items",
-    Default = false,
-    Callback = function(value)
-        AUTO_BUY_GEAR_ENABLED = value
-        
-        if value then
-            if #SELECTED_GEAR == 0 then
-                WindUI:Notify({
-                    Title = "No Gear Selected",
-                    Content = "Please select gear items before enabling auto-buy",
-                    Duration = 3,
-                    Icon = "alert-triangle",
-                })
-                GearAutoBuyToggle:SetValue(false)
-                return
-            end
-            
-            WindUI:Notify({
-                Title = "Gear Auto Buy Started",
-                Content = "Buying " .. #SELECTED_GEAR .. " gear item(s) continuously",
-                Duration = 3,
-                Icon = "play",
-            })
-            startGearAutoBuy()
-        else
-            WindUI:Notify({
-                Title = "Gear Auto Buy Stopped",
-                Content = "Gear auto-buy has been disabled",
-                Duration = 2,
-                Icon = "stop-circle",
-            })
-        end
-    end
-})
-
-MainTab:Space()
-
-local ControlSectionGear = MainTab:Section({
-    Title = "Auto system",
-    Icon = "",
-})
-
--- Remote to fire repeatedly
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local EquipBestBrainrots = ReplicatedStorage.Remotes.EquipBestBrainrots -- RemoteEvent
-
--- Variables for toggle and interval control
-local running = false
-local interval = 50 -- Default interval in seconds (from slider)
-
--- Toggle to start/stop the repeating fire
-local ToggleTimer = MainTab:Toggle({
-    Title = "Auto Equip Best Brainrots",
-    Desc = "",
-    Default = false,
-    Callback = function(state)
-        running = state
-        if state then
-            -- Start the repeating loop in a new thread
-            spawn(function()
-                while running do
-                    EquipBestBrainrots:FireServer()
-                    print("Fired EquipBestBrainrots remote")
-                    wait(interval) -- Wait for the set interval
-                end
-            end)
-        end
-        print("Auto Equip: " .. tostring(state))
-    end
-})
-
--- Slider to control the interval (in seconds)
-local Slidertimer = MainTab:Slider({
-    Title = "Repeat Interval",
-    Step = 1,
-    Value = {
-        Min = 5,  -- Minimum 5 second to avoid spam
-        Max = 300,
-        Default = 50,
-    },
-    Callback = function(value)
-        interval = value
-        print("Interval set to: " .. value .. " seconds")
-    end
-})
-
-local CombatTab = Window:Tab({
-    Title = "Combat",
-    Icon = "sword",
-    Locked = false,
-})
-
--- Kill Aura Settings and Functions
-local Settings = {
-    Enabled = false,
-    AttackSpeed = 0.05,
-    TweenSpeed = 0.3,
-    Distance = 3,
-    HeightOffset = 15,
-    InfiniteMode = true,
-    AttackAllMode = true,
-    RarityFilterEnabled = true,
-    TargetRarities = {},
-    AttackAllRarities = false,
-}
-
--- Get folders
-local MissionBrainrotsFolder = Workspace:WaitForChild("ScriptedMap"):WaitForChild("MissionBrainrots")
-local AttackRemote = ReplicatedStorage.Remotes.AttacksServer.WeaponAttack
-local ChangeSettingRemote = ReplicatedStorage.Remotes.ChangeSetting
-
--- State variables
-local currentTarget = nil
-local isTweening = false
-local lastAttackTime = 0
-local totalKills = 0
-local rarityKills = {}
-local mainConnection = nil
-local gravityConnection = nil
-local searchConnection = nil
-local showOthersDisabled = false
-
--- Available rarities
-local RARITIES = { "Rare", "Epic", "Legendary", "Mythic", "Godly", "Secret", "Limited" }
-
--- Function to disable ShowOthers (runs continuously when enabled)
-local function manageShowOthers()
-    if Settings.Enabled and not showOthersDisabled then
-        pcall(function()
-            ChangeSettingRemote:FireServer({
-                Value = false,
-                Setting = "ShowOthers"
-            })
-        end)
-        showOthersDisabled = true
-        print("[VISIBILITY] ShowOthers disabled")
-    end
-end
-
--- Function to get brainrot position
-local function getPosition(obj)
-    if not obj or not obj.Parent then return nil end
-   
-    if obj:IsA("Model") then
-        local part = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
-        if part then return part.Position end
-        return obj:GetPivot().Position
-    elseif obj:IsA("BasePart") then
-        return obj.Position
-    elseif obj:IsA("Folder") then
-        local part = obj:FindFirstChildWhichIsA("BasePart", true)
-        if part then return part.Position end
-    end
-   
-    return nil
-end
-
--- Function to get brainrot rarity
-local function getBrainrotRarity(brainrot)
-    if not brainrot or not brainrot.Parent then return nil end
-   
-    local rarity = brainrot:GetAttribute("Rarity")
-    if rarity then return rarity end
-   
-    local rarityValue = brainrot:FindFirstChild("Rarity")
-    if rarityValue and rarityValue:IsA("ValueBase") then
-        return rarityValue.Value
-    end
-   
-    return nil
-end
-
--- Function to check if brainrot matches rarity filter
-local function matchesRarityFilter(brainrot)
-    if not Settings.RarityFilterEnabled then return true end
-    if Settings.AttackAllRarities then return true end
-    if #Settings.TargetRarities == 0 then return true end
-   
-    local rarity = getBrainrotRarity(brainrot)
-    if not rarity then return false end
-   
-    -- Check if rarity is in selected list
-    for _, targetRarity in ipairs(Settings.TargetRarities) do
-        if rarity:lower() == targetRarity:lower() then
-            return true
-        end
-    end
-   
-    return false
-end
-
--- Function to get brainrot ID
-local function getBrainrotID(brainrot)
-    if brainrot:IsA("Model") then
-        local id = brainrot:GetAttribute("ID")
-            or brainrot:GetAttribute("BrainrotID")
-            or brainrot:GetAttribute("UniqueID")
-            or brainrot:GetAttribute("GUID")
-       
-        if id then return id end
-       
-        local idValue = brainrot:FindFirstChild("ID")
-            or brainrot:FindFirstChild("BrainrotID")
-            or brainrot:FindFirstChild("UniqueID")
-       
-        if idValue and idValue:IsA("ValueBase") then
-            return idValue.Value
-        end
-    end
-   
-    return brainrot
-end
-
--- Function to find nearest brainrot
-local function findNearest()
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        return nil
-    end
-   
-    local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
-    local nearest = nil
-    local nearestDist = math.huge
-   
-    for _, brainrot in pairs(MissionBrainrotsFolder:GetChildren()) do
-        if matchesRarityFilter(brainrot) then
-            local pos = getPosition(brainrot)
-            if pos then
-                local dist = (pos - playerPos).Magnitude
-                if dist < nearestDist then
-                    nearest = brainrot
-                    nearestDist = dist
-                end
-            end
-        end
-    end
-   
-    return nearest
-end
-
--- Function to tween to target
-local function tweenToTarget(targetPos)
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        return
-    end
-   
-    local hrp = LocalPlayer.Character.HumanoidRootPart
-    local direction = (targetPos - hrp.Position).Unit
-    local closePos = targetPos - (direction * Settings.Distance)
-    local airPos = closePos + Vector3.new(0, Settings.HeightOffset, 0)
-   
-    local tweenInfo = TweenInfo.new(
-        Settings.TweenSpeed,
-        Enum.EasingStyle.Linear,
-        Enum.EasingDirection.InOut
-    )
-   
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(airPos, targetPos)})
-   
-    isTweening = true
-    tween:Play()
-   
-    tween.Completed:Connect(function()
-        isTweening = false
-    end)
-end
-
--- Function to attack all brainrots
-local function attackAll()
-    local missionBrainrots = {}
-   
-    for _, brainrot in pairs(MissionBrainrotsFolder:GetChildren()) do
-        if matchesRarityFilter(brainrot) then
-            local id = getBrainrotID(brainrot)
-            if id then
-                table.insert(missionBrainrots, id)
-            end
-        end
-    end
-   
-    if #missionBrainrots > 0 then
-        local args = {
-            {
-                NormalBrainrots = {},
-                MissionBrainrots = missionBrainrots
-            }
-        }
-       
-        pcall(function()
-            AttackRemote:FireServer(unpack(args))
-        end)
-    end
-end
-
--- Function to attack single target
-local function attack(brainrotID)
-    if not brainrotID then return end
-   
-    local args = {
-        {
-            NormalBrainrots = {},
-            MissionBrainrots = { brainrotID }
-        }
-    }
-   
-    pcall(function()
-        AttackRemote:FireServer(unpack(args))
-    end)
-end
-
--- Function to start the kill aura
-local function startKillAura()
-    if mainConnection then return end
-   
-    print("[KILL AURA] Starting...")
-    manageShowOthers()
-   
-    -- Main loop
-    mainConnection = RunService.Heartbeat:Connect(function()
-        if not Settings.Enabled then return end
-       
-        -- Check if target is still valid
-        if currentTarget and not currentTarget.Parent then
-            local rarity = getBrainrotRarity(currentTarget) or "Unknown"
-            rarityKills[rarity] = (rarityKills[rarity] or 0) + 1
-            totalKills = totalKills + 1
-            currentTarget = nil
-        end
-       
-        -- Find new target
-        if not currentTarget or not currentTarget.Parent then
-            currentTarget = findNearest()
-            if currentTarget then
-                local pos = getPosition(currentTarget)
-                if pos then
-                    tweenToTarget(pos)
-                end
-            else
-                task.wait(0.1)
-                return
-            end
-        end
-       
-        -- Keep player floating
-        if currentTarget and not isTweening then
-            local targetPos = getPosition(currentTarget)
-            if targetPos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = LocalPlayer.Character.HumanoidRootPart
-                local currentDist = (hrp.Position - targetPos).Magnitude
-               
-                if currentDist > 10 then
-                    tweenToTarget(targetPos)
-                end
-            end
-        end
-       
-        -- Attack
-        local currentTime = tick()
-        if currentTime - lastAttackTime >= Settings.AttackSpeed then
-            if Settings.AttackAllMode then
-                attackAll()
-            elseif currentTarget then
-                local brainrotID = getBrainrotID(currentTarget)
-                attack(brainrotID)
-            end
-            lastAttackTime = currentTime
-        end
-    end)
-   
-    -- Keep player in air
-    gravityConnection = RunService.RenderStepped:Connect(function()
-        if Settings.Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = LocalPlayer.Character.HumanoidRootPart
-            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-        end
-    end)
-   
-    -- Auto-search loop
-    searchConnection = task.spawn(function()
-        while Settings.Enabled and Settings.InfiniteMode do
-            task.wait(2)
-            if Settings.Enabled and not currentTarget then
-                currentTarget = findNearest()
-            end
-        end
-    end)
-   
-    print("[KILL AURA] Started successfully!")
-end
-
--- Function to stop the kill aura
-local function stopKillAura()
-    print("[KILL AURA] Stopping...")
-   
-    if mainConnection then
-        mainConnection:Disconnect()
-        mainConnection = nil
-    end
-   
-    if gravityConnection then
-        gravityConnection:Disconnect()
-        gravityConnection = nil
-    end
-   
-    if searchConnection then
-        task.cancel(searchConnection)
-        searchConnection = nil
-    end
-   
-    currentTarget = nil
-    isTweening = false
-    showOthersDisabled = false
-   
-    print("[KILL AURA] Stopped!")
-end
-
--- Combat Tab UI Elements
-local MainSection = CombatTab:Section({
-    Title = "Main Controls",
-    Icon = "power",
-})
-
-local StatsParagraph = CombatTab:Paragraph({
-    Title = "Before Enabling Kill Aura \n *Make sure to hold a bat",
-    Desc = "",
-    Color = "Blue",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {}
-})
-
-local MainToggle = CombatTab:Toggle({
-    Title = "Enable Auto Attack",
-    Desc = "",
-    Default = false,
-    Callback = function(state)
-        Settings.Enabled = state
-       
-        if state then
-            startKillAura()
-            WindUI:Notify({
-                Title = "Kill Aura Enabled",
-                Content = "Super fast movement and spam attack activated",
-                Duration = 3,
-                Icon = "play",
-            })
-        else
-            stopKillAura()
-            WindUI:Notify({
-                Title = "Kill Aura Disabled",
-                Content = "Kill aura stopped",
-                Duration = 2,
-                Icon = "stop-circle",
-            })
-        end
-       
-        print("[TOGGLE] Kill Aura:", state and "ON" or "OFF")
-    end
-})
-
-CombatTab:Space()
-
-local SettingsSection = CombatTab:Section({
-    Title = "Settings",
-    Icon = "settings",
-})
-
-local RarityDropdown = CombatTab:Dropdown({
-    Title = "Target Rarities",
-    Values = RARITIES,
-    Value = {},
-    Multi = true,
-    AllowNone = true,
-    Callback = function(selectedRarities)
-        Settings.TargetRarities = selectedRarities
-       
-        if #selectedRarities == 0 then
-            Settings.AttackAllRarities = true
-            print("[RARITY] No rarities selected - Attacking ALL")
-            WindUI:Notify({
-                Title = "Rarity Filter",
-                Content = "No rarities selected - Attacking all",
-                Duration = 2,
-                Icon = "info",
-            })
-        else
-            Settings.AttackAllRarities = false
-            print("[RARITY] Selected:", table.concat(selectedRarities, ", "))
-            WindUI:Notify({
-                Title = "Rarity Filter",
-                Content = table.concat(selectedRarities, ", ") .. " selected",
-                Duration = 2,
-                Icon = "check",
-            })
-        end
-    end
-})
-
-local HeightSlider = CombatTab:Slider({
-    Title = "Height Offset",
-    Desc = "How high to float above targets",
-    Step = 1,
-    Value = {
-        Min = 5,
-        Max = 50,
-        Default = 15,
-    },
-    Callback = function(value)
-        Settings.HeightOffset = value
-        print("[HEIGHT] Set to:", value, "studs")
-        WindUI:Notify({
-            Title = "Height Offset",
-            Content = "Set to " .. value .. " studs",
-            Duration = 2,
-            Icon = "check",
-        })
-    end
-})
-
-CombatTab:Space()
-
-local StatsSection = CombatTab:Section({
-    Title = "Statistics",
-    Icon = "bar-chart-2",
-})
-
-local StatsParagraph = CombatTab:Paragraph({
-    Title = "Kill Statistics",
-    Desc = "Total Kills: 0\n\nKills by Rarity:\n• Unknown: 0",
-    Color = "Blue",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {}
-})
-
-local function updateStats()
-    local statsText = string.format("Total Kills: %d\n\nKills by Rarity:", totalKills)
-   
-    for rarity, count in pairs(rarityKills) do
-        statsText = statsText .. string.format("\n• %s: %d", rarity, count)
-    end
-   
-    if StatsParagraph and StatsParagraph.SetDesc then
-        StatsParagraph:SetDesc(statsText)
-    else
-        -- Fallback: recreate or assume library supports
-        print(statsText)
-    end
-end
-
--- Update stats every 2 seconds
-task.spawn(function()
-    while true do
-        task.wait(2)
-        updateStats()
-    end
-end)
-
-local ResetButton = CombatTab:Button({
-    Title = "Reset Statistics",
-    Desc = "Clear all kill counts",
-    Locked = false,
-    Callback = function()
-        totalKills = 0
-        rarityKills = {}
-        updateStats()
-        print("[STATS] Reset!")
-        WindUI:Notify({
-            Title = "Stats Reset",
-            Content = "All kill counts cleared",
-            Duration = 2,
-            Icon = "refresh-cw",
-        })
-    end
-})
-
-CombatTab:Space()
-
-local SpawnTab = Window:Tab({
-    Title = "Spawner",
-    Icon = "box",
-    Locked = false,
-})
-
---// Tool Copier - Copy tools from ReplicatedStorage to Backpack
-
-local player = game:GetService("Players").LocalPlayer
-local backpack = player.Backpack
-local replicatedStorage = game:GetService("ReplicatedStorage")
-
--- Asset paths to copy from
-local assetPaths = {
-	{name = "Seeds", path = replicatedStorage.Assets.Seeds},
-	{name = "Eggs", path = replicatedStorage.Assets.Eggs},
-	{name = "Crates", path = replicatedStorage.Assets.Crates},
-	{name = "Bats", path = replicatedStorage.Assets.Bats}
-}
-
--- Function to get all tool names from a path
-local function getToolNames(path)
-	local toolNames = {}
-	if not path then return toolNames end
-	
-	for _, item in pairs(path:GetChildren()) do
-		if item:IsA("Tool") then
-			table.insert(toolNames, item.Name)
-		end
-	end
-	return toolNames
-end
-
--- Function to copy tool to backpack
-local function copyToolToBackpack(tool)
-	if tool:IsA("Tool") then
-		local clone = tool:Clone()
-		clone.Parent = backpack
-		return true
-	end
-	return false
-end
-
--- Function to copy multiple tools by name
-local function copyToolsByNames(path, toolNames)
-	local copied = 0
-	local failed = 0
-	
-	for _, toolName in pairs(toolNames) do
-		local tool = path:FindFirstChild(toolName)
-		if tool and copyToolToBackpack(tool) then
-			copied = copied + 1
-		else
-			failed = failed + 1
-		end
-		wait(0.05)
-	end
-	
-	return copied, failed
-end
-
--- Status label to display feedback
-local statusText = "Ready to copy tools"
-
--- Create sections and components for each category
-for _, categoryData in ipairs(assetPaths) do
-	local Section = SpawnTab:Section({
-		Title = categoryData.name,
-		Icon = "box",
-	})
-	
-	-- Get all tool names for this category
-	local toolNames = getToolNames(categoryData.path)
-	
-	-- Create dropdown to select tools
-	local Dropdown = Section:Dropdown({
-		Title = categoryData.name .. " Items",
-		Desc = "Select items to copy from " .. categoryData.name,
-		Values = toolNames,
-		Value = {},
-		Multi = true,
-		AllowNone = true,
-		Callback = function(options)
-			-- Store selected tools for later use
-			print(categoryData.name .. " selected: " .. game:GetService("HttpService"):JSONEncode(options))
-		end
-	})
-	
-	-- Create Copy Selected button
-	local CopySelectedBtn = Section:Button({
-		Title = "Copy Selected " .. categoryData.name,
-		Desc = "Copy only the selected items from " .. categoryData.name,
-		Locked = false,
-		Callback = function()
-			local selectedTools = Dropdown.Value or {}
-			
-			if #selectedTools == 0 then
-				print("No tools selected from " .. categoryData.name)
-				return
-			end
-			
-			statusText = "Copying " .. categoryData.name .. " items..."
-			print(statusText)
-			
-			local copied, failed = copyToolsByNames(categoryData.path, selectedTools)
-			
-			statusText = "✅ Copied " .. copied .. " tools from " .. categoryData.name
-			if failed > 0 then
-				statusText = statusText .. " (" .. failed .. " failed)"
-			end
-			print(statusText)
-		end
-	})
-	
-	-- Create Copy All button for this category
-	local CopyAllBtn = Section:Button({
-		Title = "Copy All " .. categoryData.name,
-		Desc = "Copy all items from " .. categoryData.name,
-		Locked = false,
-		Callback = function()
-			statusText = "Copying all " .. categoryData.name .. "..."
-			print(statusText)
-			
-			local copied = 0
-			local failed = 0
-			
-			for _, item in pairs(categoryData.path:GetChildren()) do
-				if copyToolToBackpack(item) then
-					copied = copied + 1
-				else
-					failed = failed + 1
-				end
-				wait(0.05)
-			end
-			
-			statusText = "✅ Copied " .. copied .. " tools from " .. categoryData.name
-			if failed > 0 then
-				statusText = statusText .. " (" .. failed .. " failed)"
-			end
-			print(statusText)
-		end
-	})
-end
-
--- Create a Master Controls section
-local MasterSection = SpawnTab:Section({
-	Title = "Master Controls",
-	Icon = "settings",
-})
-
--- Copy Everything button
-local CopyEverythingBtn = MasterSection:Button({
-	Title = "Copy Everything",
-	Desc = "Copy all tools from all categories",
-	Locked = false,
-	Callback = function()
-		statusText = "Copying all categories..."
-		print(statusText)
-		
-		local totalCopied = 0
-		local totalFailed = 0
-		
-		for _, categoryData in ipairs(assetPaths) do
-			for _, item in pairs(categoryData.path:GetChildren()) do
-				if copyToolToBackpack(item) then
-					totalCopied = totalCopied + 1
-				else
-					totalFailed = totalFailed + 1
-				end
-				wait(0.05)
-			end
-		end
-		
-		statusText = "✅ Copied " .. totalCopied .. " total tools!"
-		if totalFailed > 0 then
-			statusText = statusText .. " (" .. totalFailed .. " failed)"
-		end
-		print(statusText)
-	end
-})
-
-print("✅ Tool Copier loaded!")
-print("📦 Categories: Seeds, Eggs, Crates, Bats")
-print("🔧 Select items from dropdowns and click 'Copy Selected' or use 'Copy All' for each category")
-
-local TpTab = Window:Tab({
-    Title = "Teleport",
-    Icon = "map-pin",
-    Locked = false,
-})
-
-local ButtonTp1 = TpTab:Button({
-    Title = "Teleport to Plot 1",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["1"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonTp2 = TpTab:Button({
-    Title = "Teleport to Plot 2",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["2"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonTp3 = TpTab:Button({
-    Title = "Teleport to Plot 3",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["3"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonTp4 = TpTab:Button({
-    Title = "Teleport to Plot 4",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["4"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonTp5 = TpTab:Button({
-    Title = "Teleport to Plot 5",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["5"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonTp6 = TpTab:Button({
-    Title = "Teleport to Plot 6",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = workspace.Plots["6"].Origin
-            if targetPart and targetPart:IsA("BasePart") then
-                character.HumanoidRootPart.CFrame = targetPart.CFrame
-                print("Teleported to Plot 1 Origin")
-            else
-                print("Target part not found!")
-            end
-        else
-            print("Character not loaded!")
-        end
-    end
-})
-
-local ButtonEvnt = TpTab:Button({
-    Title = "Teleport to Event area",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-        
-        -- Teleport to the specified Vector3 position
-        humanoidRootPart.CFrame = CFrame.new(Vector3.new(-173.81, 17.61, 978.32))
-        
-        print("Teleported")
-    end
-})
-
-
---// Seed Stock Notifier - UI Version
-
-local NotifierTab = Window:Tab({
-    Title = "Seed Notifier",
-    Icon = "bell",
-    Locked = false,
-})
-
--- All available seeds
-local allSeeds = {
-	"Cactus Seed",
-	"Watermelon Seed",
-	"Tomatrio Seed",
-	"Sunflower Seed",
-	"Strawberry Seed",
-	"Shroombino Seed",
-	"Pumpkin Seed",
-	"Mr Carrot Seed",
-	"Mango Seed",
-	"King Limone Seed",
-	"Grape Seed",
-	"Eggplant Seed",
-	"Dragon Fruit Seed",
-	"Cocotank Seed",
-	"Carnivorous Plant Seed",
-	"Starfruit Seed"
-}
-
--- Color options for embed
-local colorOptions = {
-	"Red",
-	"Blue",
-	"Green",
-	"Yellow",
-	"Purple",
-	"Orange",
-	"Pink",
-	"Cyan"
-}
-
-local colorMap = {
-	["Red"] = 16711680,
-	["Blue"] = 255,
-	["Green"] = 65280,
-	["Yellow"] = 16776960,
-	["Purple"] = 9109504,
-	["Orange"] = 16744448,
-	["Pink"] = 16711935,
-	["Cyan"] = 65535
-}
-
--- Variables
-local webhook = ""
-local notifierTitle = "🌱 Seed Stock Alert"
-local selectedSeeds = {}
-local selectedColor = "Blue"
-local running = false
-local lastSentTime = "Never"
-local nextRestockTime = "--:--"
-local hasSent458 = false
-
--- Function to get seed stock data
-local function getSeedStockData(seeds)
-	local player = game:GetService("Players").LocalPlayer
-	local basePath = player.PlayerGui.Main.Seeds.Frame.ScrollingFrame
-	
-	local stockData = {}
-	for _, seedName in ipairs(seeds) do
-		local success, stock = pcall(function()
-			return basePath[seedName].Stock.Text
-		end)
-		
-		if success then
-			table.insert(stockData, "*" .. seedName .. ":* " .. stock)
-		else
-			table.insert(stockData, "*" .. seedName .. ":* ❌ Not Found")
-		end
-	end
-	
-	return table.concat(stockData, "\n")
-end
-
--- Function to send notification
-local function sendNotification(restockTime)
-	if webhook == "" then
-		print("❌ Webhook URL not set!")
-		return
-	end
-	
-	local sedsToSend = #selectedSeeds > 0 and selectedSeeds or allSeeds
-	local stockInfo = getSeedStockData(sedsToSend)
-	local timestamp = os.date("%I:%M:%S %p")
-	local embedColor = colorMap[selectedColor] or 255
-	
-	local data = {
-		["embeds"] = {{
-			["title"] = notifierTitle,
-			["description"] = stockInfo,
-			["color"] = embedColor,
-			["footer"] = {
-				["text"] = "Alert sent at " .. timestamp .. " | By Fryzer"
-			}
-		}}
-	}
-
-	local success, err = pcall(function()
-		request({
-			Url = webhook,
-			Method = "POST",
-			Headers = {["Content-Type"] = "application/json"},
-			Body = game:GetService("HttpService"):JSONEncode(data)
-		})
-	end)
-
-	if success then
-		lastSentTime = timestamp .. " (at 04:57)"
-		hasSent458 = true
-		print("✅ Notification sent!")
-	else
-		warn("❌ Notifier Error:", err)
-	end
-end
-
--- Function to check restock timer
-local function checkRestockTimer()
-	local player = game:GetService("Players").LocalPlayer
-	local success, restockText = pcall(function()
-		return player.PlayerGui.Main.Seeds.Restock.Text
-	end)
-	
-	if success and restockText then
-		nextRestockTime = restockText:match("New seeds in (.+)") or restockText
-		
-		if restockText:match("04:57") then
-			if not hasSent458 then
-				sendNotification(restockText)
-			end
-		else
-			if hasSent458 then
-				hasSent458 = false
-			end
-		end
-	else
-		nextRestockTime = "❌ Not Found"
-	end
-end
-
--- Webhook Input
-pcall(function()
-	local WebhookInput = NotifierTab:Input({
-		Title = "Webhook URL",
-		Desc = "Enter your Discord webhook URL",
-		Placeholder = "https://discord.com/api/webhooks/...",
-		Callback = function(input)
-			webhook = input
-			print("✅ Webhook set!")
-		end
-	})
-end)
-
--- Title Input
-pcall(function()
-	local TitleInput = NotifierTab:Input({
-		Title = "Notification Title",
-		Placeholder = "Seed Stock Alert",
-		Callback = function(input)
-			if input and input ~= "" then
-				notifierTitle = input
-			else
-				notifierTitle = "Seed Stock Alert"
-			end
-			print("✅ Title updated!")
-		end
-	})
-end)
-
--- Color Dropdown
-local ColorDropdown = NotifierTab:Dropdown({
-	Title = "Embed Color",
-	Desc = "Choose embed color for Discord message",
-	Values = colorOptions,
-	Value = "Blue",
-	Callback = function(option)
-		selectedColor = option
-		print("✅ Color set to: " .. option)
-	end
-})
-
--- Seeds Dropdown
-local SeedsDropdown = NotifierTab:Dropdown({
-	Title = "Seeds to Monitor",
-	Desc = "Select which seeds to include in notifications",
-	Values = allSeeds,
-	Value = {},
-	Multi = true,
-	AllowNone = true,
-	Callback = function(options)
-		selectedSeeds = options
-		print("✅ Seeds selected!")
-	end
-})
-
--- Main Toggle
-local MainToggle = NotifierTab:Toggle({
-	Title = "Enable Notifier",
-	Desc = "Start/Stop monitoring restock timer",
-	Icon = "power",
-	Default = false,
-	Callback = function(state)
-		running = state
-		if running then
-			hasSent458 = false
-			print("✅ Seed notifier started!")
-		else
-			print("❌ Seed notifier stopped!")
-		end
-	end
-})
-
--- Main monitoring loop
-spawn(function()
-	while true do
-		wait(0.5)
-		
-		if running then
-			checkRestockTimer()
-		else
-			wait(1)
-		end
-	end
-end)
-
-print("✅ Seed Stock Notifier UI loaded!")
-print("📋 Configure webhook, title, and seeds")
-print("🌱 Select seeds and enable to start monitoring")
-
--- All available gears
-local allGears = {
-	"Water Bucket",
-	"Frost Grenade",
-	"Frost Blower",
-	"Carrot Launcher",
-	"Banana Gun"
-}
-
--- Divider for Gear Section
-NotifierTab:Divider()
-
--- Variables for Gears
-local gearWebhook = ""
-local gearTitle = "⚙️ Gear Stock Alert"
-local selectedGears = {}
-local gearSelectedColor = "Blue"
-local gearRunning = false
-local gearLastSentTime = "Never"
-local gearNextRestockTime = "--:--"
-local gearHasSent458 = false
-
--- Function to get gear stock data
-local function getGearStockData(gears)
-	local player = game:GetService("Players").LocalPlayer
-	local basePath = player.PlayerGui.Main.Gears.Frame.ScrollingFrame
-	
-	local stockData = {}
-	for _, gearName in ipairs(gears) do
-		local success, stock = pcall(function()
-			return basePath[gearName].Stock.Text
-		end)
-		
-		if success then
-			table.insert(stockData, "*" .. gearName .. ":* " .. stock)
-		else
-			table.insert(stockData, "*" .. gearName .. ":* ❌ Not Found")
-		end
-	end
-	
-	return table.concat(stockData, "\n")
-end
-
--- Function to send gear notification
-local function sendGearNotification(restockTime)
-	if gearWebhook == "" then
-		print("❌ Gear Webhook URL not set!")
-		return
-	end
-	
-	local gearsToSend = #selectedGears > 0 and selectedGears or allGears
-	local stockInfo = getGearStockData(gearsToSend)
-	local timestamp = os.date("%I:%M:%S %p")
-	local embedColor = colorMap[gearSelectedColor] or 255
-	
-	local data = {
-		["embeds"] = {{
-			["title"] = gearTitle,
-			["description"] = stockInfo,
-			["color"] = embedColor,
-			["footer"] = {
-				["text"] = "Alert sent at " .. timestamp .. " | By Fryzer"
-			}
-		}}
-	}
-
-	local success, err = pcall(function()
-		request({
-			Url = gearWebhook,
-			Method = "POST",
-			Headers = {["Content-Type"] = "application/json"},
-			Body = game:GetService("HttpService"):JSONEncode(data)
-		})
-	end)
-
-	if success then
-		gearLastSentTime = timestamp .. " (at 04:57)"
-		gearHasSent458 = true
-		print("✅ Gear notification sent!")
-	else
-		warn("❌ Gear Notifier Error:", err)
-	end
-end
-
--- Function to check gear restock timer
-local function checkGearRestockTimer()
-	local player = game:GetService("Players").LocalPlayer
-	local success, restockText = pcall(function()
-		return player.PlayerGui.Main.Gears.Restock.Text
-	end)
-	
-	if success and restockText then
-		gearNextRestockTime = restockText:match("New gears in (.+)") or restockText
-		
-		if restockText:match("04:57") then
-			if not gearHasSent458 then
-				sendGearNotification(restockText)
-			end
-		else
-			if gearHasSent458 then
-				gearHasSent458 = false
-			end
-		end
-	else
-		gearNextRestockTime = "❌ Not Found"
-	end
-end
-
--- Gear Webhook Input
-pcall(function()
-	local GearWebhookInput = NotifierTab:Input({
-		Title = "Gear Webhook URL",
-		Desc = "Enter your Discord webhook URL for gears",
-		Placeholder = "https://discord.com/api/webhooks/...",
-		Callback = function(input)
-			gearWebhook = input
-			print("✅ Gear Webhook set!")
-		end
-	})
-end)
-
--- Gear Title Input
-pcall(function()
-	local GearTitleInput = NotifierTab:Input({
-		Title = "Gear Notification Title",
-		Placeholder = "Gear Stock Alert",
-		Callback = function(input)
-			if input and input ~= "" then
-				gearTitle = input
-			else
-				gearTitle = "Gear Stock Alert"
-			end
-			print("✅ Gear title updated!")
-		end
-	})
-end)
-
--- Gear Color Dropdown
-local GearColorDropdown = NotifierTab:Dropdown({
-	Title = "Gear Embed Color",
-	Desc = "Choose embed color for gear Discord message",
-	Values = colorOptions,
-	Value = "Blue",
-	Callback = function(option)
-		gearSelectedColor = option
-		print("✅ Gear color set to: " .. option)
-	end
-})
-
--- Gears Dropdown
-local GearsDropdown = NotifierTab:Dropdown({
-	Title = "Gears to Monitor",
-	Desc = "Select which gears to include in notifications",
-	Values = allGears,
-	Value = {},
-	Multi = true,
-	AllowNone = true,
-	Callback = function(options)
-		selectedGears = options
-		print("✅ Gears selected!")
-	end
-})
-
--- Gear Main Toggle
-local GearMainToggle = NotifierTab:Toggle({
-	Title = "Enable Gear Notifier",
-	Desc = "Start/Stop monitoring gear restock timer",
-	Icon = "power",
-	Default = false,
-	Callback = function(state)
-		gearRunning = state
-		if state then
-			gearHasSent458 = false
-			print("✅ Gear notifier started!")
-		else
-			print("❌ Gear notifier stopped!")
-		end
-	end
-})
-
--- Gear monitoring loop
-spawn(function()
-	while true do
-		wait(0.5)
-		
-		if gearRunning then
-			checkGearRestockTimer()
-		else
-			wait(1)
-		end
-	end
-end)
-
-print("✅ Gear Stock Notifier UI loaded!")
-print("📋 Configure gear webhook, title, and gears")
-print("⚙️ Select gears and enable to start monitoring")
---
-
-local MiscTab = Window:Tab({
-    Title = "Misc",
-    Icon = "folder",
-    Locked = false,
-})
-
-local ToggleAntiAFK = MiscTab:Toggle({
-    Title = "Anti AFK",
-    Desc = "Prevents automatic idle kick",
-    Icon = "shield-check",
-    Type = "Checkbox",
-    Default = false,
-    Callback = function(state)
-        if state then
-            local player = game.Players.LocalPlayer
-
-            -- Disconnect existing idle connections if any
-            if getgenv().AntiAFKConnection then
-                getgenv().AntiAFKConnection:Disconnect()
-            end
-
-            -- Connect to Idled event
-            getgenv().AntiAFKConnection = player.Idled:Connect(function()
-                -- simulate click or jump to prevent kick
-                game:GetService("VirtualUser"):CaptureController()
-                game:GetService("VirtualUser"):ClickButton2(Vector2.new())
-                print("⏱ Anti-AFK triggered!")
-            end)
-
-            print("✅ Anti-AFK enabled")
-        else
-            -- Disconnect Anti-AFK
-            if getgenv().AntiAFKConnection then
-                getgenv().AntiAFKConnection:Disconnect()
-                getgenv().AntiAFKConnection = nil
-            end
-            print("⛔ Anti-AFK disabled")
-        end
-    end
-})
-
-local Buttonpowersave = MiscTab:Button({
-    Title = "Power Save Mode",
-    Desc = "Open Power Save Script",
-    Locked = false,
-    Callback = function()
-        print("Opening Power Save Script...")
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/FryzerHub/SubScripts/refs/heads/main/screen%20saver"))()
-    end
-})
-
--- ==================== TAB 6: SETTINGS ====================
-local Tab6 = Window:Tab({
-    Title = "Settings",
-    Icon = "settings",
-    Locked = false,
-})
-
-local SettingsSection1 = Tab6:Section({
-    Title = "Window Settings",
-    Icon = "layout",
-})
-
-Tab6:Space()
-
--- Transparency Toggle
-local TransparencyToggle = Tab6:Toggle({
-    Title = "Window Transparency",
-    Desc = "Toggle window transparency on/off",
-    Icon = "eye",
-    Type = "Checkbox",
-    Default = false,
-    Callback = function(state)
-        Window:ToggleTransparency(state)
-        print("Transparency: " .. tostring(state))
-    end
-})
-
-Tab6:Divider()
-
-local SettingsSection2 = Tab6:Section({
-    Title = "Keybind Settings",
-    Icon = "keyboard",
-})
-
--- Input field for keybind
-local KeybindInput = Tab6:Input({
-    Title = "Toggle UI Keybind",
-    Desc = "Type ONE letter or key (e.g., Q or RightControl)",
-    Value = "RightControl",
-    InputIcon = "keyboard",
-    Type = "Input",
-    Placeholder = "Enter key...",
-    Callback = function(input)
-        -- Trim whitespace
-        input = input:gsub("^%s*(.-)%s*$", "%1")
-        
-        local keyCode
-        
-        -- Check if it's a single letter (case insensitive)
-        if #input == 1 then
-            local upperInput = input:upper()
-            keyCode = Enum.KeyCode[upperInput]
-        else
-            -- Try as a full KeyCode name
-            local success, result = pcall(function()
-                return Enum.KeyCode[input]
-            end)
-            if success then
-                keyCode = result
-            end
-        end
-        
-        if keyCode then
-            Window:SetToggleKey(keyCode)
-            print("Keybind set to: " .. input)
-            WindUI:Notify({
-                Title = "Keybind Updated",
-                Content = "Press '" .. input .. "' to toggle UI",
-                Duration = 3,
-                Icon = "check",
-            })
-        else
-            print("Invalid key: " .. input)
-            WindUI:Notify({
-                Title = "Invalid Key",
-                Content = "Enter a single letter (Q) or key name (RightControl)",
-                Duration = 4,
-                Icon = "x",
-            })
-        end
-    end
-})
-
--- Set default toggle key
-Window:SetToggleKey(Enum.KeyCode.RightControl)
-
-Tab6:Space()
-
--- ==================== WINDOW LEVEL COMPONENTS ====================
-Window:Space()
-
--- Final Notification
-WindUI:Notify({
-    Title = "All Components Loaded",
-    Content = "Every component is now visible!",
-    Duration = 5,
-    Icon = "check-circle",
-})
-
-WindUI:Notify({
-    Title = "Fryzer Hub Loaded",
-    Content = "Script is ready to use!",
-    Duration = 2.5,
-    Icon = "check-circle",
-})
-
-Window:OnDestroy(function()
-    stopKillAura()
-    print("Window destroyed")
-end)
-
--- Cleanup on script stop
-game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
-    stopKillAura()
-end)
-
---! Your Main Script Function
-local function executeMainScript()
-    local StarterGui = game:GetService("StarterGui")
-    StarterGui:SetCore("SendNotification", {
-        Title = "FRYZER HUB";
-        Text = "Successfully loaded!";
-        Duration = 5;
-    })
-    
-    -- PUT YOUR MAIN SCRIPT CODE HER
-
-
-end
-
---! Wait for game to load
-repeat task.wait(1) until game:IsLoaded()
-
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-
-
 --! Services
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-
 --! Utility Functions
 local requestSending = false;
 local fSetClipboard = setclipboard or toclipboard
@@ -1902,9 +26,7 @@ local fOsTime = os.time
 local fMathRandom = math.random
 local fMathFloor = math.floor
 local fGetHwid = gethwid or function() return game:GetService("Players").LocalPlayer.UserId end
-
 local cachedLink, cachedTime = "", 0;
-
 --! Pick host
 local host = "https://api.platoboost.com";
 local hostResponse = fRequest({
@@ -1914,7 +36,6 @@ local hostResponse = fRequest({
 if hostResponse.StatusCode ~= 200 and hostResponse.StatusCode ~= 429 then
     host = "https://api.platoboost.net";
 end
-
 --! Cache link function
 function cacheLink()
     if cachedTime + (10*60) < fOsTime() then
@@ -1929,10 +50,8 @@ function cacheLink()
                 ["Content-Type"] = "application/json"
             }
         });
-
         if response.StatusCode == 200 then
             local decoded = lDecode(response.Body);
-
             if decoded.success == true then
                 cachedLink = decoded.data.url;
                 cachedTime = fOsTime();
@@ -1943,15 +62,12 @@ function cacheLink()
         elseif response.StatusCode == 429 then
             return false, "Rate limited, please wait 20 seconds";
         end
-
         return false, "Failed to cache link";
     else
         return true, cachedLink;
     end
 end
-
 cacheLink();
-
 --! Generate nonce
 local generateNonce = function()
     local str = ""
@@ -1960,21 +76,17 @@ local generateNonce = function()
     end
     return str
 end
-
 --! Redeem key function
 local redeemKey = function(key)
     local nonce = generateNonce();
     local endpoint = host .. "/public/redeem/" .. fToString(service);
-
     local body = {
         identifier = lDigest(fGetHwid()),
         key = key
     }
-
     if useNonce then
         body.nonce = nonce;
     end
-
     local response = fRequest({
         Url = endpoint,
         Method = "POST",
@@ -1983,10 +95,8 @@ local redeemKey = function(key)
             ["Content-Type"] = "application/json"
         }
     });
-
     if response.StatusCode == 200 then
         local decoded = lDecode(response.Body);
-
         if decoded.success == true then
             if decoded.data.valid == true then
                 if useNonce then
@@ -1994,7 +104,7 @@ local redeemKey = function(key)
                         return true, "Key verified successfully!";
                     else
                         return false, "Failed to verify integrity";
-                    end    
+                    end
                 else
                     return true, "Key verified successfully!";
                 end
@@ -2014,7 +124,6 @@ local redeemKey = function(key)
         return false, "Server error, try again later";
     end
 end
-
 --! Verify key function
 local verifyKey = function(key)
     if requestSending == true then
@@ -2022,24 +131,18 @@ local verifyKey = function(key)
     else
         requestSending = true;
     end
-
     local nonce = generateNonce();
     local endpoint = host .. "/public/whitelist/" .. fToString(service) .. "?identifier=" .. lDigest(fGetHwid()) .. "&key=" .. key;
-
     if useNonce then
         endpoint = endpoint .. "&nonce=" .. nonce;
     end
-
     local response = fRequest({
         Url = endpoint,
         Method = "GET",
     });
-
     requestSending = false;
-
     if response.StatusCode == 200 then
         local decoded = lDecode(response.Body);
-
         if decoded.success == true then
             if decoded.data.valid == true then
                 if useNonce then
@@ -2067,7 +170,6 @@ local verifyKey = function(key)
         return false, "Server error, try again later";
     end
 end
-
 --! GUI Creation
 local GUI_SIZE = UDim2.new(0, 400, 0, 220)
 local BLACK = Color3.fromRGB(0, 0, 0)
@@ -2075,16 +177,13 @@ local WHITE = Color3.fromRGB(255, 255, 255)
 local DARK_GRAY = Color3.fromRGB(20, 20, 20)
 local LIGHT_GRAY = Color3.fromRGB(240, 240, 240)
 local MEDIUM_GRAY = Color3.fromRGB(128, 128, 128)
-
 if playerGui:FindFirstChild("MinimalKeyGUI") then
     playerGui.MinimalKeyGUI:Destroy()
 end
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MinimalKeyGUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
-
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = GUI_SIZE
@@ -2092,7 +191,6 @@ mainFrame.Position = UDim2.new(0.5, -200, 0.5, -110)
 mainFrame.BackgroundColor3 = BLACK
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
-
 local borderFrame = Instance.new("Frame")
 borderFrame.Name = "BorderFrame"
 borderFrame.Size = UDim2.new(1, 6, 1, 6)
@@ -2101,7 +199,6 @@ borderFrame.BackgroundColor3 = WHITE
 borderFrame.BorderSizePixel = 0
 borderFrame.ZIndex = -1
 borderFrame.Parent = mainFrame
-
 local titleSection = Instance.new("Frame")
 titleSection.Name = "TitleSection"
 titleSection.Size = UDim2.new(1, 0, 0, 60)
@@ -2109,7 +206,6 @@ titleSection.Position = UDim2.new(0, 0, 0, 0)
 titleSection.BackgroundColor3 = WHITE
 titleSection.BorderSizePixel = 0
 titleSection.Parent = mainFrame
-
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
 titleLabel.Size = UDim2.new(1, -40, 1, 0)
@@ -2121,7 +217,6 @@ titleLabel.TextSize = 24
 titleLabel.Font = Enum.Font.SourceSansBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = titleSection
-
 local separator = Instance.new("Frame")
 separator.Name = "Separator"
 separator.Size = UDim2.new(1, -40, 0, 1)
@@ -2129,14 +224,12 @@ separator.Position = UDim2.new(0, 20, 1, -1)
 separator.BackgroundColor3 = BLACK
 separator.BorderSizePixel = 0
 separator.Parent = titleSection
-
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
 contentFrame.Size = UDim2.new(1, -40, 1, -80)
 contentFrame.Position = UDim2.new(0, 20, 0, 70)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
-
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Name = "Status"
 statusLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -2148,7 +241,6 @@ statusLabel.TextSize = 14
 statusLabel.Font = Enum.Font.SourceSans
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.Parent = contentFrame
-
 local inputContainer = Instance.new("Frame")
 inputContainer.Name = "InputContainer"
 inputContainer.Size = UDim2.new(1, 0, 0, 40)
@@ -2156,7 +248,6 @@ inputContainer.Position = UDim2.new(0, 0, 0, 30)
 inputContainer.BackgroundColor3 = BLACK
 inputContainer.BorderSizePixel = 0
 inputContainer.Parent = contentFrame
-
 local inputBorder = Instance.new("Frame")
 inputBorder.Name = "InputBorder"
 inputBorder.Size = UDim2.new(1, 2, 1, 2)
@@ -2165,7 +256,6 @@ inputBorder.BackgroundColor3 = WHITE
 inputBorder.BorderSizePixel = 0
 inputBorder.ZIndex = -1
 inputBorder.Parent = inputContainer
-
 local keyBox = Instance.new("TextBox")
 keyBox.Name = "KeyBox"
 keyBox.Size = UDim2.new(1, -20, 1, 0)
@@ -2181,14 +271,12 @@ keyBox.ClearTextOnFocus = false
 keyBox.TextXAlignment = Enum.TextXAlignment.Left
 keyBox.ClipsDescendants = true
 keyBox.Parent = inputContainer
-
 local buttonFrame = Instance.new("Frame")
 buttonFrame.Name = "ButtonFrame"
 buttonFrame.Size = UDim2.new(1, 0, 0, 40)
 buttonFrame.Position = UDim2.new(0, 0, 0, 85)
 buttonFrame.BackgroundTransparency = 1
 buttonFrame.Parent = contentFrame
-
 local function createButton(name, text, position, isBlack)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -2201,7 +289,7 @@ local function createButton(name, text, position, isBlack)
     button.TextSize = 14
     button.Font = Enum.Font.SourceSansBold
     button.Parent = buttonFrame
-    
+   
     local buttonBorder = Instance.new("Frame")
     buttonBorder.Name = "Border"
     buttonBorder.Size = UDim2.new(1, 2, 1, 2)
@@ -2210,14 +298,12 @@ local function createButton(name, text, position, isBlack)
     buttonBorder.BorderSizePixel = 0
     buttonBorder.ZIndex = -1
     buttonBorder.Parent = button
-    
+   
     return button
 end
-
 local getKeyButton = createButton("GetKeyButton", "GET KEY", UDim2.new(0, 0, 0, 0), true)
 local verifyButton = createButton("VerifyButton", "VERIFY", UDim2.new(0.35, 0, 0, 0), false)
 local discordButton = createButton("DiscordButton", "DISCORD", UDim2.new(0.7, 0, 0, 0), true)
-
 local progressContainer = Instance.new("Frame")
 progressContainer.Name = "ProgressContainer"
 progressContainer.Size = UDim2.new(1, 0, 0, 3)
@@ -2226,7 +312,6 @@ progressContainer.BackgroundColor3 = DARK_GRAY
 progressContainer.BorderSizePixel = 0
 progressContainer.Visible = false
 progressContainer.Parent = contentFrame
-
 local progressBar = Instance.new("Frame")
 progressBar.Name = "ProgressBar"
 progressBar.Size = UDim2.new(0, 0, 1, 0)
@@ -2234,7 +319,6 @@ progressBar.Position = UDim2.new(0, 0, 0, 0)
 progressBar.BackgroundColor3 = WHITE
 progressBar.BorderSizePixel = 0
 progressBar.Parent = progressContainer
-
 local function fadeText(element, transparency, duration)
     return TweenService:Create(
         element,
@@ -2242,15 +326,14 @@ local function fadeText(element, transparency, duration)
         {TextTransparency = transparency}
     )
 end
-
 local function updateStatus(message, isError, showProgress)
     statusLabel.Text = message
     statusLabel.TextColor3 = isError and LIGHT_GRAY or WHITE
-    
+   
     if showProgress then
         progressContainer.Visible = true
         progressBar.Size = UDim2.new(0, 0, 1, 0)
-        
+       
         local tween = TweenService:Create(
             progressBar,
             TweenInfo.new(2, Enum.EasingStyle.Linear),
@@ -2265,19 +348,18 @@ local function updateStatus(message, isError, showProgress)
         progressContainer.Visible = false
     end
 end
-
 local function setupButton(button, isBlack)
     local originalBg = button.BackgroundColor3
     local hoverBg = isBlack and DARK_GRAY or LIGHT_GRAY
-    
+   
     button.MouseEnter:Connect(function()
         TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverBg}):Play()
     end)
-    
+   
     button.MouseLeave:Connect(function()
         TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalBg}):Play()
     end)
-    
+   
     button.MouseButton1Down:Connect(function()
         local flashTween = TweenService:Create(
             button,
@@ -2287,34 +369,30 @@ local function setupButton(button, isBlack)
         flashTween:Play()
     end)
 end
-
 keyBox.Focused:Connect(function()
     TweenService:Create(inputBorder, TweenInfo.new(0.2), {BackgroundColor3 = LIGHT_GRAY}):Play()
 end)
-
 keyBox.FocusLost:Connect(function(enterPressed)
     TweenService:Create(inputBorder, TweenInfo.new(0.2), {BackgroundColor3 = WHITE}):Play()
     if enterPressed then
         verifyButton.MouseButton1Click:Fire()
     end
 end)
-
 setupButton(getKeyButton, true)
 setupButton(verifyButton, false)
 setupButton(discordButton, true)
-
 --! Get Key Button - Uses PlatoBoost cacheLink
 getKeyButton.MouseButton1Click:Connect(function()
     updateStatus("Generating key link...", false, true)
-    
+   
     spawn(function()
         local success, link = cacheLink()
-        
+       
         if success then
             local clipSuccess = pcall(function()
                 fSetClipboard(link)
             end)
-            
+           
             if clipSuccess then
                 updateStatus("Key link copied to clipboard!", false)
             else
@@ -2325,49 +403,48 @@ getKeyButton.MouseButton1Click:Connect(function()
         end
     end)
 end)
-
 --! Verify Button - Uses PlatoBoost verifyKey
 verifyButton.MouseButton1Click:Connect(function()
     local key = keyBox.Text:gsub("%s+", "")
-    
+   
     if key == "" then
         updateStatus("Please enter a key", true)
         return
     end
-    
+   
     updateStatus("Verifying access...", false, true)
-    
+   
     spawn(function()
         local success, message = verifyKey(key)
-        
+       
         if success then
             updateStatus("Access granted!", false)
             task.wait(1)
-            
+           
             local fadeOut = TweenService:Create(
                 mainFrame,
                 TweenInfo.new(0.5, Enum.EasingStyle.Quad),
                 {BackgroundTransparency = 1}
             )
-            
+           
             local borderFadeOut = TweenService:Create(
                 borderFrame,
                 TweenInfo.new(0.5, Enum.EasingStyle.Quad),
                 {BackgroundTransparency = 1}
             )
-            
+           
             local titleFadeOut = TweenService:Create(
                 titleSection,
                 TweenInfo.new(0.5, Enum.EasingStyle.Quad),
                 {BackgroundTransparency = 1}
             )
-            
+           
             fadeOut:Play()
             borderFadeOut:Play()
             titleFadeOut:Play()
             fadeText(titleLabel, 1, 0.5):Play()
             fadeText(statusLabel, 1, 0.5):Play()
-            
+           
             fadeOut.Completed:Connect(function()
                 screenGui:Destroy()
                 executeMainScript()
@@ -2377,16 +454,15 @@ verifyButton.MouseButton1Click:Connect(function()
         end
     end)
 end)
-
 --! Discord Button
 discordButton.MouseButton1Click:Connect(function()
     updateStatus("Opening Discord invite...", false, true)
-    
+   
     spawn(function()
         local success = pcall(function()
             fSetClipboard(DISCORD_INVITE)
         end)
-        
+       
         if success then
             updateStatus("Discord invite copied to clipboard!", false)
         else
@@ -2394,25 +470,1702 @@ discordButton.MouseButton1Click:Connect(function()
         end
     end)
 end)
-
 --! Initial GUI Animation
 mainFrame.BackgroundTransparency = 1
 titleSection.BackgroundTransparency = 1
 borderFrame.BackgroundTransparency = 1
 titleLabel.TextTransparency = 1
 statusLabel.TextTransparency = 1
-
 TweenService:Create(mainFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
 TweenService:Create(titleSection, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
 TweenService:Create(borderFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
-
 task.wait(0.1)
 fadeText(titleLabel, 0, 0.3):Play()
 task.wait(0.1)
 fadeText(statusLabel, 0, 0.3):Play()
-
 updateStatus("Enter your access key", false)
-
 print("[FRYZER HUB] Key system loaded successfully!")
 print("[FRYZER HUB] PlatoBoost integration active!")
 print("[FRYZER HUB] Service ID: " .. service)
+
+--! Your Main Script Function (MOVED ALL HUB CODE HERE)
+local function executeMainScript()
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCore("SendNotification", {
+        Title = "FRYZER HUB";
+        Text = "Successfully loaded!";
+        Duration = 5;
+    })
+    -- Fryzer Hub for Plants vs Brainrot v2
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
+    local Workspace = game:GetService("Workspace")
+    local LocalPlayer = Players.LocalPlayer
+    local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+    WindUI:SetNotificationLower(true)
+    WindUI:AddTheme({
+        Name = "Blue Theme",
+        Accent = Color3.fromRGB(37, 99, 235),
+        Dialog = Color3.fromRGB(15, 23, 42),
+        Outline = Color3.fromRGB(59, 130, 246),
+        Text = Color3.fromRGB(248, 250, 252),
+        Placeholder = Color3.fromRGB(100, 116, 139),
+        Background = Color3.fromRGB(15, 23, 42),
+        Button = Color3.fromRGB(30, 58, 138),
+        Icon = Color3.fromRGB(147, 197, 253)
+    })
+    local Window = WindUI:CreateWindow({
+        Title = "Fryzer Hub",
+        Icon = "",
+        Author = "Plants vs Brainrot",
+        Folder = "AutoBuyHub",
+        Size = UDim2.fromOffset(580, 460),
+        MinSize = Vector2.new(560, 350),
+        MaxSize = Vector2.new(850, 560),
+        Transparent = true,
+        Theme = "Blue Theme",
+        Resizable = true,
+        SideBarWidth = 200,
+        BackgroundImageTransparency = 0.42,
+        HideSearchBar = false,
+        ScrollBarEnabled = true,
+    })
+    Window:Tag({
+        Title = "v4.5",
+        Color = Color3.fromHex("#30ff6a"),
+        Radius = 8,
+    })
+    Window:Tag({
+        Title = "PVB",
+        Color = Color3.fromHex("#ff0000"),
+        Radius = 10,
+    })
+    local InfoTab = Window:Tab({
+        Title = "Info",
+        Icon = "info",
+        Locked = false,
+    })
+    InfoTab:Select()
+    local Sectiontest = InfoTab:Section({
+        Title = "Player Information Dashboard",
+        Icon = "user-check",
+    })
+    InfoTab:Paragraph({
+        Title = "Player Information Dashboard",
+        Desc = "Complete player details, game information, and community access",
+        Color = "Blue",
+        Image = "",
+        ImageSize = 30,
+        Thumbnail = "",
+        ThumbnailSize = 80,
+        Locked = false,
+        Buttons = {}
+    })
+    local Players = game:GetService("Players")
+    local HttpService = game:GetService("HttpService")
+    local Player = Players.LocalPlayer
+    local PlayerName = Player.DisplayName ~= "" and Player.DisplayName or Player.Name
+    local AccountAge = Player.AccountAge
+    local GameName = "Unknown Game"
+    pcall(function()
+        GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    end)
+    InfoTab:Paragraph({
+        Title = "👤 " .. PlayerName,
+        Desc = string.format(
+            "🏷️ Username: @%s\n🎂 Account Age: %d days\n🆔 User ID: %d\n🎮 Current Game: %s\n👥 Server: %d/%d players\n📍 Region: %s",
+            Player.Name, AccountAge, Player.UserId, GameName,
+            #Players:GetPlayers(), Players.MaxPlayers,
+            game:GetService("LocalizationService").RobloxLocaleId
+        ),
+        Color = "Blue",
+        Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. Player.UserId .. "&width=150&height=150&format=png",
+        ImageSize = 52,
+        Thumbnail = "",
+        ThumbnailSize = 80,
+        Locked = false,
+        Buttons = {}
+    })
+    InfoTab:Divider()
+    local Section2 = InfoTab:Section({
+        Title = "Join Our Discord Community",
+        Icon = "users",
+    })
+    InfoTab:Paragraph({
+        Title = "Join Our Discord Community",
+        Desc = "Connect with other users, get support, and stay updated!",
+        Color = "Blue",
+        Image = "",
+        ImageSize = 30,
+        Thumbnail = "",
+        ThumbnailSize = 80,
+        Locked = false,
+        Buttons = {}
+    })
+    InfoTab:Button({
+        Title = "Copy Discord Link",
+        Desc = "Copy invite link to clipboard",
+        Locked = false,
+        Callback = function()
+            setclipboard("https://discord.gg/SYHphHCq9a")
+            WindUI:Notify({
+                Title = "Link Copied!",
+                Content = "Discord link copied to clipboard",
+                Duration = 3,
+                Icon = "copy",
+            })
+        end
+    })
+    InfoTab:Space()
+    -- Configuration Variables for Seeds
+    local AUTO_BUY_ENABLED = false
+    local SELECTED_ITEMS = {}
+    local CLICK_DELAY = 0.1
+    local buyRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyItem")
+    -- Configuration Variables for Gear
+    local AUTO_BUY_GEAR_ENABLED = false
+    local SELECTED_GEAR = {}
+    local GEAR_CLICK_DELAY = 0.1
+    local buyGearRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyGear")
+    -- Available items (you can add more here)
+    local AVAILABLE_ITEMS = {
+        "Cactus Seed",
+        "Watermelon Seed",
+        "Tomatrio Seed",
+        "Sunflower Seed",
+        "Strawberry Seed",
+        "Shroombino Seed",
+        "Pumpkin Seed",
+        "Mr Carrot Seed",
+        "Mango Seed",
+        "King Limone Seed",
+        "Grape Seed",
+        "Eggplant Seed",
+        "Dragon Fruit Seed",
+        "Cocotank Seed",
+        "Carnivorous Plant Seed",
+    }
+    -- Available gear items
+    local AVAILABLE_GEAR = {
+        "Water Bucket",
+        "Frost Grenade",
+        "Frost Blower",
+        "Carrot Launcher",
+        "Banana Gun",
+    }
+    -- Function to buy seeds
+    local function clickButton(itemName)
+        pcall(function()
+            local args = {itemName, true}
+            buyRemote:FireServer(unpack(args))
+        end)
+    end
+    -- Function to buy gear
+    local function clickGearButton(gearName)
+        pcall(function()
+            local args = {gearName, true}
+            buyGearRemote:FireServer(unpack(args))
+        end)
+    end
+    -- Main auto-buy loop for seeds
+    local function startAutoBuy()
+        spawn(function()
+            while AUTO_BUY_ENABLED do
+                if #SELECTED_ITEMS > 0 then
+                    for _, itemName in ipairs(SELECTED_ITEMS) do
+                        clickButton(itemName)
+                        wait(CLICK_DELAY / #SELECTED_ITEMS)
+                    end
+                end
+                wait(0.01)
+            end
+        end)
+    end
+    -- Main auto-buy loop for gear
+    local function startGearAutoBuy()
+        spawn(function()
+            while AUTO_BUY_GEAR_ENABLED do
+                if #SELECTED_GEAR > 0 then
+                    for _, gearName in ipairs(SELECTED_GEAR) do
+                        clickGearButton(gearName)
+                        wait(GEAR_CLICK_DELAY / #SELECTED_GEAR)
+                    end
+                end
+                wait(0.01)
+            end
+        end)
+    end
+    -- Create Main Tab
+    local MainTab = Window:Tab({
+        Title = "Auto",
+        Icon = "repeat",
+        Locked = false,
+    })
+    -- Section: Auto Buy Controls
+    local ControlSection = MainTab:Section({
+        Title = "Auto Buy Controls",
+        Icon = "shopping-cart",
+    })
+    local ControlSectionseeds = MainTab:Section({
+        Title = "Seeds Auto Buyer",
+        Icon = "",
+    })
+    -- Multi-Select Dropdown for Items
+    local ItemDropdown = MainTab:Dropdown({
+        Title = "Select Items to Buy",
+        Values = AVAILABLE_ITEMS,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(selectedItems)
+            SELECTED_ITEMS = selectedItems
+            WindUI:Notify({
+                Title = "Items Updated",
+                Content = #selectedItems .. " item(s) selected for auto-buy",
+                Duration = 2,
+                Icon = "check",
+            })
+        end
+    })
+    -- Toggle for Auto Buy
+    local AutoBuyToggle = MainTab:Toggle({
+        Title = "Enable Auto Buy",
+        Desc = "Automatically purchase selected items",
+        Default = false,
+        Callback = function(value)
+            AUTO_BUY_ENABLED = value
+           
+            if value then
+                if #SELECTED_ITEMS == 0 then
+                    WindUI:Notify({
+                        Title = "No Items Selected",
+                        Content = "Please select items before enabling auto-buy",
+                        Duration = 3,
+                        Icon = "alert-triangle",
+                    })
+                    AutoBuyToggle:SetValue(false)
+                    return
+                end
+               
+                WindUI:Notify({
+                    Title = "Auto Buy Started",
+                    Content = "Buying " .. #SELECTED_ITEMS .. " item(s) continuously",
+                    Duration = 3,
+                    Icon = "play",
+                })
+                startAutoBuy()
+            else
+                WindUI:Notify({
+                    Title = "Auto Buy Stopped",
+                    Content = "Auto-buy has been disabled",
+                    Duration = 2,
+                    Icon = "stop-circle",
+                })
+            end
+        end
+    })
+    MainTab:Space()
+    local ControlSectionGear = MainTab:Section({
+        Title = "Gear Auto Buyer",
+        Icon = "",
+    })
+    -- Multi-Select Dropdown for Gear
+    local GearDropdown = MainTab:Dropdown({
+        Title = "Select Gear to Buy",
+        Values = AVAILABLE_GEAR,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(selectedGear)
+            SELECTED_GEAR = selectedGear
+            WindUI:Notify({
+                Title = "Gear Updated",
+                Content = #selectedGear .. " gear item(s) selected for auto-buy",
+                Duration = 2,
+                Icon = "check",
+            })
+        end
+    })
+    -- Toggle for Gear Auto Buy
+    local GearAutoBuyToggle = MainTab:Toggle({
+        Title = "Enable Gear Auto Buy",
+        Desc = "Automatically purchase selected gear items",
+        Default = false,
+        Callback = function(value)
+            AUTO_BUY_GEAR_ENABLED = value
+           
+            if value then
+                if #SELECTED_GEAR == 0 then
+                    WindUI:Notify({
+                        Title = "No Gear Selected",
+                        Content = "Please select gear items before enabling auto-buy",
+                        Duration = 3,
+                        Icon = "alert-triangle",
+                    })
+                    GearAutoBuyToggle:SetValue(false)
+                    return
+                end
+               
+                WindUI:Notify({
+                    Title = "Gear Auto Buy Started",
+                    Content = "Buying " .. #SELECTED_GEAR .. " gear item(s) continuously",
+                    Duration = 3,
+                    Icon = "play",
+                })
+                startGearAutoBuy()
+            else
+                WindUI:Notify({
+                    Title = "Gear Auto Buy Stopped",
+                    Content = "Gear auto-buy has been disabled",
+                    Duration = 2,
+                    Icon = "stop-circle",
+                })
+            end
+        end
+    })
+    MainTab:Space()
+    local ControlSectionGear = MainTab:Section({
+        Title = "Auto system",
+        Icon = "",
+    })
+    -- Remote to fire repeatedly
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local EquipBestBrainrots = ReplicatedStorage.Remotes.EquipBestBrainrots -- RemoteEvent
+    -- Variables for toggle and interval control
+    local running = false
+    local interval = 50 -- Default interval in seconds (from slider)
+    -- Toggle to start/stop the repeating fire
+    local ToggleTimer = MainTab:Toggle({
+        Title = "Auto Equip Best Brainrots",
+        Desc = "",
+        Default = false,
+        Callback = function(state)
+            running = state
+            if state then
+                -- Start the repeating loop in a new thread
+                spawn(function()
+                    while running do
+                        EquipBestBrainrots:FireServer()
+                        print("Fired EquipBestBrainrots remote")
+                        wait(interval) -- Wait for the set interval
+                    end
+                end)
+            end
+            print("Auto Equip: " .. tostring(state))
+        end
+    })
+    -- Slider to control the interval (in seconds)
+    local Slidertimer = MainTab:Slider({
+        Title = "Repeat Interval",
+        Step = 1,
+        Value = {
+            Min = 5, -- Minimum 5 second to avoid spam
+            Max = 300,
+            Default = 50,
+        },
+        Callback = function(value)
+            interval = value
+            print("Interval set to: " .. value .. " seconds")
+        end
+    })
+    local CombatTab = Window:Tab({
+        Title = "Combat",
+        Icon = "sword",
+        Locked = false,
+    })
+    -- Kill Aura Settings and Functions
+    local Settings = {
+        Enabled = false,
+        AttackSpeed = 0.05,
+        TweenSpeed = 0.3,
+        Distance = 3,
+        HeightOffset = 15,
+        InfiniteMode = true,
+        AttackAllMode = true,
+        RarityFilterEnabled = true,
+        TargetRarities = {},
+        AttackAllRarities = false,
+    }
+    -- Get folders
+    local MissionBrainrotsFolder = Workspace:WaitForChild("ScriptedMap"):WaitForChild("MissionBrainrots")
+    local AttackRemote = ReplicatedStorage.Remotes.AttacksServer.WeaponAttack
+    local ChangeSettingRemote = ReplicatedStorage.Remotes.ChangeSetting
+    -- State variables
+    local currentTarget = nil
+    local isTweening = false
+    local lastAttackTime = 0
+    local totalKills = 0
+    local rarityKills = {}
+    local mainConnection = nil
+    local gravityConnection = nil
+    local searchConnection = nil
+    local showOthersDisabled = false
+    -- Available rarities
+    local RARITIES = { "Rare", "Epic", "Legendary", "Mythic", "Godly", "Secret", "Limited" }
+    -- Function to disable ShowOthers (runs continuously when enabled)
+    local function manageShowOthers()
+        if Settings.Enabled and not showOthersDisabled then
+            pcall(function()
+                ChangeSettingRemote:FireServer({
+                    Value = false,
+                    Setting = "ShowOthers"
+                })
+            end)
+            showOthersDisabled = true
+            print("[VISIBILITY] ShowOthers disabled")
+        end
+    end
+    -- Function to get brainrot position
+    local function getPosition(obj)
+        if not obj or not obj.Parent then return nil end
+      
+        if obj:IsA("Model") then
+            local part = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+            if part then return part.Position end
+            return obj:GetPivot().Position
+        elseif obj:IsA("BasePart") then
+            return obj.Position
+        elseif obj:IsA("Folder") then
+            local part = obj:FindFirstChildWhichIsA("BasePart", true)
+            if part then return part.Position end
+        end
+      
+        return nil
+    end
+    -- Function to get brainrot rarity
+    local function getBrainrotRarity(brainrot)
+        if not brainrot or not brainrot.Parent then return nil end
+      
+        local rarity = brainrot:GetAttribute("Rarity")
+        if rarity then return rarity end
+      
+        local rarityValue = brainrot:FindFirstChild("Rarity")
+        if rarityValue and rarityValue:IsA("ValueBase") then
+            return rarityValue.Value
+        end
+      
+        return nil
+    end
+    -- Function to check if brainrot matches rarity filter
+    local function matchesRarityFilter(brainrot)
+        if not Settings.RarityFilterEnabled then return true end
+        if Settings.AttackAllRarities then return true end
+        if #Settings.TargetRarities == 0 then return true end
+      
+        local rarity = getBrainrotRarity(brainrot)
+        if not rarity then return false end
+      
+        -- Check if rarity is in selected list
+        for _, targetRarity in ipairs(Settings.TargetRarities) do
+            if rarity:lower() == targetRarity:lower() then
+                return true
+            end
+        end
+      
+        return false
+    end
+    -- Function to get brainrot ID
+    local function getBrainrotID(brainrot)
+        if brainrot:IsA("Model") then
+            local id = brainrot:GetAttribute("ID")
+                or brainrot:GetAttribute("BrainrotID")
+                or brainrot:GetAttribute("UniqueID")
+                or brainrot:GetAttribute("GUID")
+          
+            if id then return id end
+          
+            local idValue = brainrot:FindFirstChild("ID")
+                or brainrot:FindFirstChild("BrainrotID")
+                or brainrot:FindFirstChild("UniqueID")
+          
+            if idValue and idValue:IsA("ValueBase") then
+                return idValue.Value
+            end
+        end
+      
+        return brainrot
+    end
+    -- Function to find nearest brainrot
+    local function findNearest()
+        if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            return nil
+        end
+      
+        local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+        local nearest = nil
+        local nearestDist = math.huge
+      
+        for _, brainrot in pairs(MissionBrainrotsFolder:GetChildren()) do
+            if matchesRarityFilter(brainrot) then
+                local pos = getPosition(brainrot)
+                if pos then
+                    local dist = (pos - playerPos).Magnitude
+                    if dist < nearestDist then
+                        nearest = brainrot
+                        nearestDist = dist
+                    end
+                end
+            end
+        end
+      
+        return nearest
+    end
+    -- Function to tween to target
+    local function tweenToTarget(targetPos)
+        if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            return
+        end
+      
+        local hrp = LocalPlayer.Character.HumanoidRootPart
+        local direction = (targetPos - hrp.Position).Unit
+        local closePos = targetPos - (direction * Settings.Distance)
+        local airPos = closePos + Vector3.new(0, Settings.HeightOffset, 0)
+      
+        local tweenInfo = TweenInfo.new(
+            Settings.TweenSpeed,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.InOut
+        )
+      
+        local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(airPos, targetPos)})
+      
+        isTweening = true
+        tween:Play()
+      
+        tween.Completed:Connect(function()
+            isTweening = false
+        end)
+    end
+    -- Function to attack all brainrots
+    local function attackAll()
+        local missionBrainrots = {}
+      
+        for _, brainrot in pairs(MissionBrainrotsFolder:GetChildren()) do
+            if matchesRarityFilter(brainrot) then
+                local id = getBrainrotID(brainrot)
+                if id then
+                    table.insert(missionBrainrots, id)
+                end
+            end
+        end
+      
+        if #missionBrainrots > 0 then
+            local args = {
+                {
+                    NormalBrainrots = {},
+                    MissionBrainrots = missionBrainrots
+                }
+            }
+          
+            pcall(function()
+                AttackRemote:FireServer(unpack(args))
+            end)
+        end
+    end
+    -- Function to attack single target
+    local function attack(brainrotID)
+        if not brainrotID then return end
+      
+        local args = {
+            {
+                NormalBrainrots = {},
+                MissionBrainrots = { brainrotID }
+            }
+        }
+      
+        pcall(function()
+            AttackRemote:FireServer(unpack(args))
+        end)
+    end
+    -- Function to start the kill aura
+    local function startKillAura()
+        if mainConnection then return end
+      
+        print("[KILL AURA] Starting...")
+        manageShowOthers()
+      
+        -- Main loop
+        mainConnection = RunService.Heartbeat:Connect(function()
+            if not Settings.Enabled then return end
+          
+            -- Check if target is still valid
+            if currentTarget and not currentTarget.Parent then
+                local rarity = getBrainrotRarity(currentTarget) or "Unknown"
+                rarityKills[rarity] = (rarityKills[rarity] or 0) + 1
+                totalKills = totalKills + 1
+                currentTarget = nil
+            end
+          
+            -- Find new target
+            if not currentTarget or not currentTarget.Parent then
+                currentTarget = findNearest()
+                if currentTarget then
+                    local pos = getPosition(currentTarget)
+                    if pos then
+                        tweenToTarget(pos)
+                    end
+                else
+                    task.wait(0.1)
+                    return
+                end
+            end
+          
+            -- Keep player floating
+            if currentTarget and not isTweening then
+                local targetPos = getPosition(currentTarget)
+                if targetPos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = LocalPlayer.Character.HumanoidRootPart
+                    local currentDist = (hrp.Position - targetPos).Magnitude
+                  
+                    if currentDist > 10 then
+                        tweenToTarget(targetPos)
+                    end
+                end
+            end
+          
+            -- Attack
+            local currentTime = tick()
+            if currentTime - lastAttackTime >= Settings.AttackSpeed then
+                if Settings.AttackAllMode then
+                    attackAll()
+                elseif currentTarget then
+                    local brainrotID = getBrainrotID(currentTarget)
+                    attack(brainrotID)
+                end
+                lastAttackTime = currentTime
+            end
+        end)
+      
+        -- Keep player in air
+        gravityConnection = RunService.RenderStepped:Connect(function()
+            if Settings.Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = LocalPlayer.Character.HumanoidRootPart
+                hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+            end
+        end)
+      
+        -- Auto-search loop
+        searchConnection = task.spawn(function()
+            while Settings.Enabled and Settings.InfiniteMode do
+                task.wait(2)
+                if Settings.Enabled and not currentTarget then
+                    currentTarget = findNearest()
+                end
+            end
+        end)
+      
+        print("[KILL AURA] Started successfully!")
+    end
+    -- Function to stop the kill aura
+    local function stopKillAura()
+        print("[KILL AURA] Stopping...")
+      
+        if mainConnection then
+            mainConnection:Disconnect()
+            mainConnection = nil
+        end
+      
+        if gravityConnection then
+            gravityConnection:Disconnect()
+            gravityConnection = nil
+        end
+      
+        if searchConnection then
+            task.cancel(searchConnection)
+            searchConnection = nil
+        end
+      
+        currentTarget = nil
+        isTweening = false
+        showOthersDisabled = false
+      
+        print("[KILL AURA] Stopped!")
+    end
+    -- Combat Tab UI Elements
+    local MainSection = CombatTab:Section({
+        Title = "Main Controls",
+        Icon = "power",
+    })
+    local StatsParagraph = CombatTab:Paragraph({
+        Title = "Before Enabling Kill Aura \n *Make sure to hold a bat",
+        Desc = "",
+        Color = "Blue",
+        Image = "",
+        ImageSize = 30,
+        Thumbnail = "",
+        ThumbnailSize = 80,
+        Locked = false,
+        Buttons = {}
+    })
+    local MainToggle = CombatTab:Toggle({
+        Title = "Enable Auto Attack",
+        Desc = "",
+        Default = false,
+        Callback = function(state)
+            Settings.Enabled = state
+          
+            if state then
+                startKillAura()
+                WindUI:Notify({
+                    Title = "Kill Aura Enabled",
+                    Content = "Super fast movement and spam attack activated",
+                    Duration = 3,
+                    Icon = "play",
+                })
+            else
+                stopKillAura()
+                WindUI:Notify({
+                    Title = "Kill Aura Disabled",
+                    Content = "Kill aura stopped",
+                    Duration = 2,
+                    Icon = "stop-circle",
+                })
+            end
+          
+            print("[TOGGLE] Kill Aura:", state and "ON" or "OFF")
+        end
+    })
+    CombatTab:Space()
+    local SettingsSection = CombatTab:Section({
+        Title = "Settings",
+        Icon = "settings",
+    })
+    local RarityDropdown = CombatTab:Dropdown({
+        Title = "Target Rarities",
+        Values = RARITIES,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(selectedRarities)
+            Settings.TargetRarities = selectedRarities
+          
+            if #selectedRarities == 0 then
+                Settings.AttackAllRarities = true
+                print("[RARITY] No rarities selected - Attacking ALL")
+                WindUI:Notify({
+                    Title = "Rarity Filter",
+                    Content = "No rarities selected - Attacking all",
+                    Duration = 2,
+                    Icon = "info",
+                })
+            else
+                Settings.AttackAllRarities = false
+                print("[RARITY] Selected:", table.concat(selectedRarities, ", "))
+                WindUI:Notify({
+                    Title = "Rarity Filter",
+                    Content = table.concat(selectedRarities, ", ") .. " selected",
+                    Duration = 2,
+                    Icon = "check",
+                })
+            end
+        end
+    })
+    local HeightSlider = CombatTab:Slider({
+        Title = "Height Offset",
+        Desc = "How high to float above targets",
+        Step = 1,
+        Value = {
+            Min = 5,
+            Max = 50,
+            Default = 15,
+        },
+        Callback = function(value)
+            Settings.HeightOffset = value
+            print("[HEIGHT] Set to:", value, "studs")
+            WindUI:Notify({
+                Title = "Height Offset",
+                Content = "Set to " .. value .. " studs",
+                Duration = 2,
+                Icon = "check",
+            })
+        end
+    })
+    CombatTab:Space()
+    local StatsSection = CombatTab:Section({
+        Title = "Statistics",
+        Icon = "bar-chart-2",
+    })
+    local StatsParagraph = CombatTab:Paragraph({
+        Title = "Kill Statistics",
+        Desc = "Total Kills: 0\n\nKills by Rarity:\n• Unknown: 0",
+        Color = "Blue",
+        Image = "",
+        ImageSize = 30,
+        Thumbnail = "",
+        ThumbnailSize = 80,
+        Locked = false,
+        Buttons = {}
+    })
+    local function updateStats()
+        local statsText = string.format("Total Kills: %d\n\nKills by Rarity:", totalKills)
+      
+        for rarity, count in pairs(rarityKills) do
+            statsText = statsText .. string.format("\n• %s: %d", rarity, count)
+        end
+      
+        if StatsParagraph and StatsParagraph.SetDesc then
+            StatsParagraph:SetDesc(statsText)
+        else
+            -- Fallback: recreate or assume library supports
+            print(statsText)
+        end
+    end
+    -- Update stats every 2 seconds
+    task.spawn(function()
+        while true do
+            task.wait(2)
+            updateStats()
+        end
+    end)
+    local ResetButton = CombatTab:Button({
+        Title = "Reset Statistics",
+        Desc = "Clear all kill counts",
+        Locked = false,
+        Callback = function()
+            totalKills = 0
+            rarityKills = {}
+            updateStats()
+            print("[STATS] Reset!")
+            WindUI:Notify({
+                Title = "Stats Reset",
+                Content = "All kill counts cleared",
+                Duration = 2,
+                Icon = "refresh-cw",
+            })
+        end
+    })
+    CombatTab:Space()
+    local SpawnTab = Window:Tab({
+        Title = "Spawner",
+        Icon = "box",
+        Locked = false,
+    })
+    --// Tool Copier - Copy tools from ReplicatedStorage to Backpack
+    local player = game:GetService("Players").LocalPlayer
+    local backpack = player.Backpack
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    -- Asset paths to copy from
+    local assetPaths = {
+    {name = "Seeds", path = replicatedStorage.Assets.Seeds},
+    {name = "Eggs", path = replicatedStorage.Assets.Eggs},
+    {name = "Crates", path = replicatedStorage.Assets.Crates},
+    {name = "Bats", path = replicatedStorage.Assets.Bats}
+    }
+    -- Function to get all tool names from a path
+    local function getToolNames(path)
+    local toolNames = {}
+    if not path then return toolNames end
+    for _, item in pairs(path:GetChildren()) do
+        if item:IsA("Tool") then
+        table.insert(toolNames, item.Name)
+        end
+    end
+    return toolNames
+    end
+    -- Function to copy tool to backpack
+    local function copyToolToBackpack(tool)
+        if tool:IsA("Tool") then
+        local clone = tool:Clone()
+        clone.Parent = backpack
+        return true
+        end
+        return false
+    end
+    -- Function to copy multiple tools by name
+    local function copyToolsByNames(path, toolNames)
+        local copied = 0
+        local failed = 0
+        for _, toolName in pairs(toolNames) do
+        local tool = path:FindFirstChild(toolName)
+        if tool and copyToolToBackpack(tool) then
+            copied = copied + 1
+        else
+            failed = failed + 1
+        end
+        wait(0.05)
+        end
+        return copied, failed
+    end
+    -- Status label to display feedback
+    local statusText = "Ready to copy tools"
+    -- Create sections and components for each category
+    for _, categoryData in ipairs(assetPaths) do
+    local Section = SpawnTab:Section({
+        Title = categoryData.name,
+        Icon = "box",
+    })
+    -- Get all tool names for this category
+    local toolNames = getToolNames(categoryData.path)
+    -- Create dropdown to select tools
+    local Dropdown = Section:Dropdown({
+        Title = categoryData.name .. " Items",
+        Desc = "Select items to copy from " .. categoryData.name,
+        Values = toolNames,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(options)
+        -- Store selected tools for later use
+        print(categoryData.name .. " selected: " .. game:GetService("HttpService"):JSONEncode(options))
+        end
+    })
+    -- Create Copy Selected button
+    local CopySelectedBtn = Section:Button({
+        Title = "Copy Selected " .. categoryData.name,
+        Desc = "Copy only the selected items from " .. categoryData.name,
+        Locked = false,
+        Callback = function()
+        local selectedTools = Dropdown.Value or {}
+        if #selectedTools == 0 then
+            print("No tools selected from " .. categoryData.name)
+            return
+        end
+        statusText = "Copying " .. categoryData.name .. " items..."
+        print(statusText)
+        local copied, failed = copyToolsByNames(categoryData.path, selectedTools)
+        statusText = "✅ Copied " .. copied .. " tools from " .. categoryData.name
+        if failed > 0 then
+        statusText = statusText .. " (" .. failed .. " failed)"
+        end
+        print(statusText)
+        end
+    })
+    -- Create Copy All button for this category
+    local CopyAllBtn = Section:Button({
+        Title = "Copy All " .. categoryData.name,
+        Desc = "Copy all items from " .. categoryData.name,
+        Locked = false,
+        Callback = function()
+        statusText = "Copying all " .. categoryData.name .. "..."
+        print(statusText)
+        local copied = 0
+        local failed = 0
+        for _, item in pairs(categoryData.path:GetChildren()) do
+            if copyToolToBackpack(item) then
+            copied = copied + 1
+            else
+            failed = failed + 1
+            end
+            wait(0.05)
+        end
+        statusText = "✅ Copied " .. copied .. " tools from " .. categoryData.name
+        if failed > 0 then
+            statusText = statusText .. " (" .. failed .. " failed)"
+        end
+        print(statusText)
+        end
+    })
+    end
+    -- Create a Master Controls section
+    local MasterSection = SpawnTab:Section({
+        Title = "Master Controls",
+        Icon = "settings",
+    })
+    -- Copy Everything button
+    local CopyEverythingBtn = MasterSection:Button({
+        Title = "Copy Everything",
+        Desc = "Copy all tools from all categories",
+        Locked = false,
+        Callback = function()
+        statusText = "Copying all categories..."
+        print(statusText)
+        local totalCopied = 0
+        local totalFailed = 0
+        for _, categoryData in ipairs(assetPaths) do
+            for _, item in pairs(categoryData.path:GetChildren()) do
+            if copyToolToBackpack(item) then
+                totalCopied = totalCopied + 1
+            else
+                totalFailed = totalFailed + 1
+            end
+            wait(0.05)
+            end
+        end
+        statusText = "✅ Copied " .. totalCopied .. " total tools!"
+        if totalFailed > 0 then
+            statusText = statusText .. " (" .. totalFailed .. " failed)"
+        end
+        print(statusText)
+        end
+    })
+    print("✅ Tool Copier loaded!")
+    print("📦 Categories: Seeds, Eggs, Crates, Bats")
+    print("🔧 Select items from dropdowns and click 'Copy Selected' or use 'Copy All' for each category")
+    local TpTab = Window:Tab({
+        Title = "Teleport",
+        Icon = "map-pin",
+        Locked = false,
+    })
+    local ButtonTp1 = TpTab:Button({
+        Title = "Teleport to Plot 1",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["1"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 1 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonTp2 = TpTab:Button({
+        Title = "Teleport to Plot 2",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["2"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 2 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonTp3 = TpTab:Button({
+        Title = "Teleport to Plot 3",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["3"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 3 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonTp4 = TpTab:Button({
+        Title = "Teleport to Plot 4",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["4"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 4 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonTp5 = TpTab:Button({
+        Title = "Teleport to Plot 5",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["5"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 5 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonTp6 = TpTab:Button({
+        Title = "Teleport to Plot 6",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = workspace.Plots["6"].Origin
+                if targetPart and targetPart:IsA("BasePart") then
+                    character.HumanoidRootPart.CFrame = targetPart.CFrame
+                    print("Teleported to Plot 6 Origin")
+                else
+                    print("Target part not found!")
+                end
+            else
+                print("Character not loaded!")
+            end
+        end
+    })
+    local ButtonEvnt = TpTab:Button({
+        Title = "Teleport to Event area",
+        Desc = "",
+        Locked = false,
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+           
+            -- Teleport to the specified Vector3 position
+            humanoidRootPart.CFrame = CFrame.new(Vector3.new(-173.81, 17.61, 978.32))
+           
+            print("Teleported")
+        end
+    })
+    --// Seed Stock Notifier - UI Version
+    local NotifierTab = Window:Tab({
+        Title = "Seed Notifier",
+        Icon = "bell",
+        Locked = false,
+    })
+    -- All available seeds
+    local allSeeds = {
+    "Cactus Seed",
+    "Watermelon Seed",
+    "Tomatrio Seed",
+    "Sunflower Seed",
+    "Strawberry Seed",
+    "Shroombino Seed",
+    "Pumpkin Seed",
+    "Mr Carrot Seed",
+    "Mango Seed",
+    "King Limone Seed",
+    "Grape Seed",
+    "Eggplant Seed",
+    "Dragon Fruit Seed",
+    "Cocotank Seed",
+    "Carnivorous Plant Seed",
+    "Starfruit Seed"
+    }
+    -- Color options for embed
+    local colorOptions = {
+    "Red",
+    "Blue",
+    "Green",
+    "Yellow",
+    "Purple",
+    "Orange",
+    "Pink",
+    "Cyan"
+    }
+    local colorMap = {
+        ["Red"] = 16711680,
+        ["Blue"] = 255,
+        ["Green"] = 65280,
+        ["Yellow"] = 16776960,
+        ["Purple"] = 9109504,
+        ["Orange"] = 16744448,
+        ["Pink"] = 16711935,
+        ["Cyan"] = 65535
+    }
+    -- Variables
+    local webhook = ""
+    local notifierTitle = "🌱 Seed Stock Alert"
+    local selectedSeeds = {}
+    local selectedColor = "Blue"
+    local running = false
+    local lastSentTime = "Never"
+    local nextRestockTime = "--:--"
+    local hasSent458 = false
+    -- Function to get seed stock data
+    local function getSeedStockData(seeds)
+    local player = game:GetService("Players").LocalPlayer
+    local basePath = player.PlayerGui.Main.Seeds.Frame.ScrollingFrame
+    local stockData = {}
+    for _, seedName in ipairs(seeds) do
+        local success, stock = pcall(function()
+        return basePath[seedName].Stock.Text
+        end)
+        if success then
+        table.insert(stockData, "*" .. seedName .. ":* " .. stock)
+        else
+        table.insert(stockData, "*" .. seedName .. ":* ❌ Not Found")
+        end
+    end
+    return table.concat(stockData, "\n")
+    end
+    -- Function to send notification
+    local function sendNotification(restockTime)
+        if webhook == "" then
+        print("❌ Webhook URL not set!")
+        return
+        end
+        local sedsToSend = #selectedSeeds > 0 and selectedSeeds or allSeeds
+        local stockInfo = getSeedStockData(sedsToSend)
+        local timestamp = os.date("%I:%M:%S %p")
+        local embedColor = colorMap[selectedColor] or 255
+        local data = {
+        ["embeds"] = {{
+            ["title"] = notifierTitle,
+            ["description"] = stockInfo,
+            ["color"] = embedColor,
+            ["footer"] = {
+            ["text"] = "Alert sent at " .. timestamp .. " | By Fryzer"
+            }
+        }}
+        }
+        local success, err = pcall(function()
+        request({
+            Url = webhook,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(data)
+        })
+        end)
+        if success then
+        lastSentTime = timestamp .. " (at 04:57)"
+        hasSent458 = true
+        print("✅ Notification sent!")
+        else
+        warn("❌ Notifier Error:", err)
+        end
+    end
+    -- Function to check restock timer
+    local function checkRestockTimer()
+        local player = game:GetService("Players").LocalPlayer
+        local success, restockText = pcall(function()
+        return player.PlayerGui.Main.Seeds.Restock.Text
+        end)
+        if success and restockText then
+        nextRestockTime = restockText:match("New seeds in (.+)") or restockText
+        if restockText:match("04:57") then
+            if not hasSent458 then
+            sendNotification(restockText)
+            end
+        else
+            if hasSent458 then
+            hasSent458 = false
+            end
+        end
+        else
+        nextRestockTime = "❌ Not Found"
+        end
+    end
+    -- Webhook Input
+    pcall(function()
+        local WebhookInput = NotifierTab:Input({
+        Title = "Webhook URL",
+        Desc = "Enter your Discord webhook URL",
+        Placeholder = "https://discord.com/api/webhooks/...",
+        Callback = function(input)
+            webhook = input
+            print("✅ Webhook set!")
+        end
+        })
+    end)
+    -- Title Input
+    pcall(function()
+        local TitleInput = NotifierTab:Input({
+        Title = "Notification Title",
+        Placeholder = "Seed Stock Alert",
+        Callback = function(input)
+            if input and input ~= "" then
+            notifierTitle = input
+            else
+            notifierTitle = "Seed Stock Alert"
+            end
+            print("✅ Title updated!")
+        end
+        })
+    end)
+    -- Color Dropdown
+    local ColorDropdown = NotifierTab:Dropdown({
+        Title = "Embed Color",
+        Desc = "Choose embed color for Discord message",
+        Values = colorOptions,
+        Value = "Blue",
+        Callback = function(option)
+        selectedColor = option
+        print("✅ Color set to: " .. option)
+        end
+    })
+    -- Seeds Dropdown
+    local SeedsDropdown = NotifierTab:Dropdown({
+        Title = "Seeds to Monitor",
+        Desc = "Select which seeds to include in notifications",
+        Values = allSeeds,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(options)
+        selectedSeeds = options
+        print("✅ Seeds selected!")
+        end
+    })
+    -- Main Toggle
+    local MainToggle = NotifierTab:Toggle({
+        Title = "Enable Notifier",
+        Desc = "Start/Stop monitoring restock timer",
+        Icon = "power",
+        Default = false,
+        Callback = function(state)
+        running = state
+        if running then
+            hasSent458 = false
+            print("✅ Seed notifier started!")
+        else
+            print("❌ Seed notifier stopped!")
+        end
+        end
+    })
+    -- Main monitoring loop
+    spawn(function()
+        while true do
+        wait(0.5)
+        if running then
+            checkRestockTimer()
+        else
+            wait(1)
+        end
+        end
+    end)
+    print("✅ Seed Stock Notifier UI loaded!")
+    print("📋 Configure webhook, title, and seeds")
+    print("🌱 Select seeds and enable to start monitoring")
+    -- All available gears
+    local allGears = {
+    "Water Bucket",
+    "Frost Grenade",
+    "Frost Blower",
+    "Carrot Launcher",
+    "Banana Gun"
+    }
+    -- Divider for Gear Section
+    NotifierTab:Divider()
+    -- Variables for Gears
+    local gearWebhook = ""
+    local gearTitle = "⚙️ Gear Stock Alert"
+    local selectedGears = {}
+    local gearSelectedColor = "Blue"
+    local gearRunning = false
+    local gearLastSentTime = "Never"
+    local gearNextRestockTime = "--:--"
+    local gearHasSent458 = false
+    -- Function to get gear stock data
+    local function getGearStockData(gears)
+        local player = game:GetService("Players").LocalPlayer
+        local basePath = player.PlayerGui.Main.Gears.Frame.ScrollingFrame
+        local stockData = {}
+        for _, gearName in ipairs(gears) do
+        local success, stock = pcall(function()
+            return basePath[gearName].Stock.Text
+        end)
+        if success then
+            table.insert(stockData, "*" .. gearName .. ":* " .. stock)
+        else
+            table.insert(stockData, "*" .. gearName .. ":* ❌ Not Found")
+        end
+        end
+        return table.concat(stockData, "\n")
+    end
+    -- Function to send gear notification
+    local function sendGearNotification(restockTime)
+        if gearWebhook == "" then
+        print("❌ Gear Webhook URL not set!")
+        return
+        end
+        local gearsToSend = #selectedGears > 0 and selectedGears or allGears
+        local stockInfo = getGearStockData(gearsToSend)
+        local timestamp = os.date("%I:%M:%S %p")
+        local embedColor = colorMap[gearSelectedColor] or 255
+        local data = {
+        ["embeds"] = {{
+            ["title"] = gearTitle,
+            ["description"] = stockInfo,
+            ["color"] = embedColor,
+            ["footer"] = {
+            ["text"] = "Alert sent at " .. timestamp .. " | By Fryzer"
+            }
+        }}
+        }
+        local success, err = pcall(function()
+        request({
+            Url = gearWebhook,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(data)
+        })
+        end)
+        if success then
+        gearLastSentTime = timestamp .. " (at 04:57)"
+        gearHasSent458 = true
+        print("✅ Gear notification sent!")
+        else
+        warn("❌ Gear Notifier Error:", err)
+        end
+    end
+    -- Function to check gear restock timer
+    local function checkGearRestockTimer()
+        local player = game:GetService("Players").LocalPlayer
+        local success, restockText = pcall(function()
+        return player.PlayerGui.Main.Gears.Restock.Text
+        end)
+        if success and restockText then
+        gearNextRestockTime = restockText:match("New gears in (.+)") or restockText
+        if restockText:match("04:57") then
+            if not gearHasSent458 then
+            sendGearNotification(restockText)
+            end
+        else
+            if gearHasSent458 then
+            gearHasSent458 = false
+            end
+        end
+        else
+        gearNextRestockTime = "❌ Not Found"
+        end
+    end
+    -- Gear Webhook Input
+    pcall(function()
+        local GearWebhookInput = NotifierTab:Input({
+        Title = "Gear Webhook URL",
+        Desc = "Enter your Discord webhook URL for gears",
+        Placeholder = "https://discord.com/api/webhooks/...",
+        Callback = function(input)
+            gearWebhook = input
+            print("✅ Gear Webhook set!")
+        end
+        })
+    end)
+    -- Gear Title Input
+    pcall(function()
+        local GearTitleInput = NotifierTab:Input({
+        Title = "Gear Notification Title",
+        Placeholder = "Gear Stock Alert",
+        Callback = function(input)
+            if input and input ~= "" then
+            gearTitle = input
+            else
+            gearTitle = "Gear Stock Alert"
+            end
+            print("✅ Gear title updated!")
+        end
+        })
+    end)
+    -- Gear Color Dropdown
+    local GearColorDropdown = NotifierTab:Dropdown({
+        Title = "Gear Embed Color",
+        Desc = "Choose embed color for gear Discord message",
+        Values = colorOptions,
+        Value = "Blue",
+        Callback = function(option)
+        gearSelectedColor = option
+        print("✅ Gear color set to: " .. option)
+        end
+    })
+    -- Gears Dropdown
+    local GearsDropdown = NotifierTab:Dropdown({
+        Title = "Gears to Monitor",
+        Desc = "Select which gears to include in notifications",
+        Values = allGears,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(options)
+        selectedGears = options
+        print("✅ Gears selected!")
+        end
+    })
+    -- Gear Main Toggle
+    local GearMainToggle = NotifierTab:Toggle({
+        Title = "Enable Gear Notifier",
+        Desc = "Start/Stop monitoring gear restock timer",
+        Icon = "power",
+        Default = false,
+        Callback = function(state)
+        gearRunning = state
+        if state then
+            gearHasSent458 = false
+            print("✅ Gear notifier started!")
+        else
+            print("❌ Gear notifier stopped!")
+        end
+        end
+    })
+    -- Gear monitoring loop
+    spawn(function()
+        while true do
+        wait(0.5)
+        if gearRunning then
+            checkGearRestockTimer()
+        else
+            wait(1)
+        end
+        end
+    end)
+    print("✅ Gear Stock Notifier UI loaded!")
+    print("📋 Configure gear webhook, title, and gears")
+    print("⚙️ Select gears and enable to start monitoring")
+    --
+    local MiscTab = Window:Tab({
+        Title = "Misc",
+        Icon = "folder",
+        Locked = false,
+    })
+    local ToggleAntiAFK = MiscTab:Toggle({
+        Title = "Anti AFK",
+        Desc = "Prevents automatic idle kick",
+        Icon = "shield-check",
+        Type = "Checkbox",
+        Default = false,
+        Callback = function(state)
+            if state then
+                local player = game.Players.LocalPlayer
+                -- Disconnect existing idle connections if any
+                if getgenv().AntiAFKConnection then
+                    getgenv().AntiAFKConnection:Disconnect()
+                end
+                -- Connect to Idled event
+                getgenv().AntiAFKConnection = player.Idled:Connect(function()
+                    -- simulate click or jump to prevent kick
+                    game:GetService("VirtualUser"):CaptureController()
+                    game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+                    print("⏱ Anti-AFK triggered!")
+                end)
+                print("✅ Anti-AFK enabled")
+            else
+                -- Disconnect Anti-AFK
+                if getgenv().AntiAFKConnection then
+                    getgenv().AntiAFKConnection:Disconnect()
+                    getgenv().AntiAFKConnection = nil
+                end
+                print("⛔ Anti-AFK disabled")
+            end
+        end
+    })
+    local Buttonpowersave = MiscTab:Button({
+        Title = "Power Save Mode",
+        Desc = "Open Power Save Script",
+        Locked = false,
+        Callback = function()
+            print("Opening Power Save Script...")
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/FryzerHub/SubScripts/refs/heads/main/screen%20saver"))()
+        end
+    })
+    -- ==================== TAB 6: SETTINGS ====================
+    local Tab6 = Window:Tab({
+        Title = "Settings",
+        Icon = "settings",
+        Locked = false,
+    })
+    local SettingsSection1 = Tab6:Section({
+        Title = "Window Settings",
+        Icon = "layout",
+    })
+    Tab6:Space()
+    -- Transparency Toggle
+    local TransparencyToggle = Tab6:Toggle({
+        Title = "Window Transparency",
+        Desc = "Toggle window transparency on/off",
+        Icon = "eye",
+        Type = "Checkbox",
+        Default = false,
+        Callback = function(state)
+            Window:ToggleTransparency(state)
+            print("Transparency: " .. tostring(state))
+        end
+    })
+    Tab6:Divider()
+    local SettingsSection2 = Tab6:Section({
+        Title = "Keybind Settings",
+        Icon = "keyboard",
+    })
+    -- Input field for keybind
+    local KeybindInput = Tab6:Input({
+        Title = "Toggle UI Keybind",
+        Desc = "Type ONE letter or key (e.g., Q or RightControl)",
+        Value = "RightControl",
+        InputIcon = "keyboard",
+        Type = "Input",
+        Placeholder = "Enter key...",
+        Callback = function(input)
+            -- Trim whitespace
+            input = input:gsub("^%s*(.-)%s*$", "%1")
+           
+            local keyCode
+           
+            -- Check if it's a single letter (case insensitive)
+            if #input == 1 then
+                local upperInput = input:upper()
+                keyCode = Enum.KeyCode[upperInput]
+            else
+                -- Try as a full KeyCode name
+                local success, result = pcall(function()
+                    return Enum.KeyCode[input]
+                end)
+                if success then
+                    keyCode = result
+                end
+            end
+           
+            if keyCode then
+                Window:SetToggleKey(keyCode)
+                print("Keybind set to: " .. input)
+                WindUI:Notify({
+                    Title = "Keybind Updated",
+                    Content = "Press '" .. input .. "' to toggle UI",
+                    Duration = 3,
+                    Icon = "check",
+                })
+            else
+                print("Invalid key: " .. input)
+                WindUI:Notify({
+                    Title = "Invalid Key",
+                    Content = "Enter a single letter (Q) or key name (RightControl)",
+                    Duration = 4,
+                    Icon = "x",
+                })
+            end
+        end
+    })
+    -- Set default toggle key
+    Window:SetToggleKey(Enum.KeyCode.RightControl)
+    Tab6:Space()
+    -- ==================== WINDOW LEVEL COMPONENTS ====================
+    Window:Space()
+    -- Final Notification
+    WindUI:Notify({
+        Title = "All Components Loaded",
+        Content = "Every component is now visible!",
+        Duration = 5,
+        Icon = "check-circle",
+    })
+    WindUI:Notify({
+        Title = "Fryzer Hub Loaded",
+        Content = "Script is ready to use!",
+        Duration = 2.5,
+        Icon = "check-circle",
+    })
+    Window:OnDestroy(function()
+        stopKillAura()
+        print("Window destroyed")
+    end)
+    -- Cleanup on script stop
+    game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+        stopKillAura()
+    end)
+end
+
+--! Wait for game to load
+repeat task.wait(1) until game:IsLoaded()
