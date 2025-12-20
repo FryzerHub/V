@@ -28,6 +28,9 @@ local GameScripts = {
     
     -- Fisch
     [16732694052] = "https://v0-lua-script-hosting.vercel.app/api/script/d2b133cc-0293-44ac-87e3-9bfeb916e8e9",
+
+    -- Fisch [New]
+    [131716211654599] = "https://v0-lua-script-hosting.vercel.app/api/script/d2b133cc-0293-44ac-87e3-9bfeb916e8e9",
     
     -- Plants Vs Brainrots
     [127742093697776] = "https://v0-lua-script-hosting.vercel.app/api/script/5b76aadd-4acd-4975-8da1-5b10f81bb659",
