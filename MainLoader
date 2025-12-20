@@ -1,1 +1,81 @@
+--[[
+    Auto Game Detector & Script Loader
+    Automatically detects which game you're in and loads the correct script
+]]
 
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local currentGameId = game.PlaceId
+local gameName = game:GetService("MarketplaceService"):GetProductInfo(currentGameId).Name
+
+-- Notification Function
+local function Notify(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration or 5,
+    })
+end
+
+-- Game Scripts Database
+-- Add your game IDs and script URLs here
+local GameScripts = {
+    -- Example: [GameID] = "Script URL or loadstring code"
+    
+    -- The Forge [BETA]
+    [76558904092080] = "https://v0-lua-script-hosting.vercel.app/api/script/78f2ef82-0554-4674-a0ff-a96d4d7f304e",
+    
+    -- Arsenal (Example ID)
+    [111958650] = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/Arsenal.lua",
+    
+    -- Blox Fruits (Example ID)
+    [2753915549] = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/BloxFruits.lua",
+    
+    -- Rivals (Example ID)
+    [17503135725] = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/Rivals.lua",
+    
+    -- Add more games here:
+    -- [GameID] = "Script URL",
+}
+
+print("🔍 Detecting game...")
+print("📌 Game ID:", currentGameId)
+print("🎮 Game Name:", gameName)
+
+-- Check if game has a script
+if GameScripts[currentGameId] then
+    Notify("✅ Game Detected!", gameName, 3)
+    wait(1)
+    
+    Notify("📦 Loading Script...", "Please wait...", 3)
+    
+    local success, result = pcall(function()
+        loadstring(game:HttpGet(GameScripts[currentGameId]))()
+    end)
+    
+    if success then
+        Notify("✅ Script Loaded!", "Enjoy!", 5)
+        print("✅ Script loaded successfully for:", gameName)
+    else
+        Notify("❌ Load Failed!", "Check console (F9)", 5)
+        warn("❌ Error loading script:", result)
+    end
+else
+    Notify("⚠️ Game Not Supported", "Loading universal script...", 3)
+    print("⚠️ No specific script for game ID:", currentGameId)
+    wait(1)
+    
+    -- Load universal script as fallback
+    local success, result = pcall(function()
+        loadstring(game:HttpGet(UniversalScript))()
+    end)
+    
+    if success then
+        Notify("✅ Universal Script Loaded!", "Limited features available", 5)
+        print("✅ Universal script loaded")
+    else
+        Notify("❌ All Scripts Failed!", "Contact support", 5)
+        warn("❌ Error loading universal script:", result)
+    end
+end
