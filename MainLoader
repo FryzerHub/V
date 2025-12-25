@@ -37,6 +37,9 @@ local GameScripts = {
 
     -- [FPS] Flick
     [136801880565837] = "https://v0-lua-script-hosting.vercel.app/api/script/9809883c-7d75-419e-a5a6-54c83424ac17",
+
+    -- Blind Shoot
+    [118614517739521] = "https://v0-lua-script-hosting.vercel.app/api/script/540d7403-3dc7-4f18-aea2-5574498a97cf",
     
     
 }
@@ -77,7 +80,7 @@ else
         Notify("✅ Universal Script Loaded!", "Limited features available", 5)
         print("✅ Universal script loaded")
     else
-        Notify("❌ All Scripts Failed!", "Contact support Using Discord Link", 5)
+        Notify("❌ All Scripts Failed!", "Contact Support Using Discord Link", 5)
         warn("❌ Error loading universal script:", result)
     end
 end
