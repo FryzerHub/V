@@ -1,7 +1,6 @@
 -- MainLoader
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
-
 local currentGameId = game.PlaceId
 local gameName = game:GetService("MarketplaceService"):GetProductInfo(currentGameId).Name
 
@@ -40,15 +39,16 @@ local GameScripts = {
 
     -- Blind Shoot
     [118614517739521] = "https://v0-lua-script-hosting.vercel.app/api/script/540d7403-3dc7-4f18-aea2-5574498a97cf",
+
+    -- Fish It!
+    [121864768012064] = "https://v0-lua-script-hosting.vercel.app/api/script/55fc230e-7821-446c-8084-37b7b3748392",
     
     
 }
 
-print("🔍 Detecting game...")
 print("📌 Game ID:", currentGameId)
 print("🎮 Game Name:", gameName)
 
--- Check if game has a script
 if GameScripts[currentGameId] then
     Notify("✅ Game Detected!", gameName, 3)
     wait(1)
@@ -71,7 +71,7 @@ else
     print("⚠️ No specific script for game ID:", currentGameId)
     wait(1)
     
-    -- Load universal script as fallback
+    -- Load universal script as fallback for no need brooo
     local success, result = pcall(function()
         loadstring(game:HttpGet(UniversalScript))()
     end)
