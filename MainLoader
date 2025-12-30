@@ -1,1 +1,98 @@
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/cc54572286353ec3115640ad0597669b.lua"))()
+-- MainLoader
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local currentGameId = game.PlaceId
+local gameName = game:GetService("MarketplaceService"):GetProductInfo(currentGameId).Name
+
+local function Notify(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration or 5,
+    })
+end
+
+setclipboard("https://discord.gg/UKYHGddQD3")
+
+Notify("Thanks For Choosin Us", "Every Script u load use the same key", 3)
+
+Notify("Discord Link Copied", "Join us", 3)
+
+local GameScripts = {
+    -- The Forge [BETA] 1 world
+    [76558904092080] = "https://v0-lua-script-hosting.vercel.app/api/script/78f2ef82-0554-4674-a0ff-a96d4d7f304e",
+
+    -- The Forge [BETA] 2 world
+    [129009554587176] = "https://v0-lua-script-hosting.vercel.app/api/script/78f2ef82-0554-4674-a0ff-a96d4d7f304e",
+    
+    -- Fisch
+    [16732694052] = "https://v0-lua-script-hosting.vercel.app/api/script/d2b133cc-0293-44ac-87e3-9bfeb916e8e9",
+
+    -- Fisch [New]
+    [131716211654599] = "https://v0-lua-script-hosting.vercel.app/api/script/d2b133cc-0293-44ac-87e3-9bfeb916e8e9",
+    
+    -- Plants Vs Brainrots
+    [127742093697776] = "https://v0-lua-script-hosting.vercel.app/api/script/5b76aadd-4acd-4975-8da1-5b10f81bb659",
+
+    -- [FPS] Flick
+    [136801880565837] = "https://v0-lua-script-hosting.vercel.app/api/script/9809883c-7d75-419e-a5a6-54c83424ac17",
+
+    -- Blind Shoot
+    [118614517739521] = "https://api.luarmor.net/files/v3/loaders/d02e3e86f68cbe926252933d9b4a8c12.lua",
+
+    -- Fish It!
+    [121864768012064] = "https://api.luarmor.net/files/v3/loaders/7329c6c9e41bc2ff64a78501f9aa64fd.lua",
+
+    -- Find The Brainrots
+    [136407404714539] = "https://api.luarmor.net/files/v3/loaders/d3f80cb10e5c37c23384bf1257ce1ecf.lua",
+
+    -- Murderers VS Sheriffs DUELS
+    [12355337193] = "https://v0-lua-script-hosting.vercel.app/api/script/2a08bc5d-c359-4e11-8b4e-15699a6adccf",
+
+    -- Last Run
+    [137604575642443] = "https://v0-lua-script-hosting.vercel.app/api/script/3b74b23b-4550-431f-b459-7c14c8c8d7cf"
+    
+    
+}
+
+print("🔍 Detecting game...")
+print("📌 Game ID:", currentGameId)
+print("🎮 Game Name:", gameName)
+
+-- Check if game has a script
+if GameScripts[currentGameId] then
+    Notify("✅ Game Detected!", gameName, 3)
+    wait(1)
+    
+    Notify("📦 Loading Script...", "Please wait...", 3)
+    
+    local success, result = pcall(function()
+        loadstring(game:HttpGet(GameScripts[currentGameId]))()
+    end)
+    
+    if success then
+        Notify("✅ Script Loaded!", "Enjoy!", 5)
+        print("✅ Script loaded successfully for:", gameName)
+    else
+        Notify("❌ Load Failed!", "Check console (F9)", 5)
+        warn("❌ Error loading script:", result)
+    end
+else
+    Notify("⚠️ Game Not Supported", "Loading universal script...", 3)
+    print("⚠️ No specific script for game ID:", currentGameId)
+    wait(1)
+    
+    -- Load universal script as fallback
+    local success, result = pcall(function()
+        loadstring(game:HttpGet(UniversalScript))()
+    end)
+    
+    if success then
+        Notify("✅ Universal Script Loaded!", "Limited features available", 5)
+        print("✅ Universal script loaded")
+    else
+        Notify("❌ All Scripts Failed!", "Contact Support Using Discord Link", 5)
+        warn("❌ Error loading universal script:", result)
+    end
+end
